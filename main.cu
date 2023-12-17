@@ -105,6 +105,9 @@ __global__ void releaseTargets(Target** targets, targetList** list, Shape** shap
 // nvcc main.cu -o main -lsfml-graphics -lsfml-window -lsfml-system
 
 int main() {
+    // #################################
+    // # SET PROGRAM RUN PARAMETERS
+    // #################################
     auto start = std::chrono::high_resolution_clock::now();
 
     int width = 1920, height = 1080;
@@ -114,7 +117,9 @@ int main() {
     WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),
     1.0f, Vector3D(1,1,100), height, width, 0.8);
 
-    // DEVICE SIDE
+    // #################################
+    // # LOAD DATA TO DEVICE
+    // #################################
 
     dim3 blocks(divup(width, tx), divup(height, ty));
     dim3 threads(tx, ty);
@@ -156,6 +161,8 @@ int main() {
     std::cout << "Successfully synchronized!" << std::endl;
 
     //######################################
+    // # GENERATE IMAGE, FREE MEMORY
+    //######################################
 
     sf::Texture texture;
     texture.create(width, height);
@@ -167,6 +174,7 @@ int main() {
 
     CHECK(cudaFree(cudaWindow));
     CHECK(cudaFree(pixels));
+    CHECK(cudaFree(randState_d));
 
     releaseBG<<<1,1>>>(background_d);
     CHECK(cudaDeviceSynchronize());
@@ -181,7 +189,7 @@ int main() {
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    std::cout << "Aikaa kului: " << duration << " s" << std::endl;
+    std::cout << "Total program runtime: " << duration << " seconds" << std::endl;
 
     cudaDeviceReset();
 
