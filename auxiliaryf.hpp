@@ -7,6 +7,7 @@
 #include "vector3D.hpp"
 
 static constexpr float epsilon = 0.00001f;
+static constexpr float phi = 1.61803f;
 
 namespace aux{
 

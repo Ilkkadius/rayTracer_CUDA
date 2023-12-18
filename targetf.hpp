@@ -19,6 +19,17 @@ Shape* shape;
         return shape->normal(point);
     }
 
+    __device__ Vector3D centroid() const {
+        return shape->centroid();
+    }
+
+    __device__ void translate(const Vector3D& vec) {shape->translate(vec);}
+    __device__ void translate(float x, float y, float z) {shape->translate(x,y,z);}
+
+    __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
+        shape->rotate(angle, axis, axisPos);
+    }
+
 
 };
 

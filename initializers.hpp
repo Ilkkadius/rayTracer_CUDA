@@ -23,16 +23,20 @@
 
 __device__ void createTargets(Target** targets, targetList** list, Shape** shapes, int N) {
     float r = 100000;
-    shapes[0] = new Sphere(Vector3D(7,0,0), 1);
-    shapes[1] = new Sphere(Vector3D(0,0,-r/2.0f), r-1);
-    shapes[2] = new Triangle(Vector3D(7,3,0), Vector3D(8,-3, 0), Vector3D(7,-1,5));
+    shapes[0] = new Sphere(Vector3D(8,3,0), 1);
+    shapes[1] = new Sphere(Vector3D(0,0,-r), r-1);
+    //shapes[2] = new Triangle(Vector3D(7,3,0), Vector3D(8,-3, 0), Vector3D(7,-1,5));
     targets[0] = new Target(shapes[0]);
     targets[1] = new Target(shapes[1]);
-    targets[2] = new Target(shapes[2]);
-    *list = new targetList(targets, 3, N);
+    //targets[2] = new Target(shapes[2]);
+    *list = new targetList(targets, 2, N);
 
-    compoundTest test;
-    test.copyToList(*list, shapes);
+    Icosahedron ico(Vector3D(10,-2,2), 0.8f);
+    ico.rotate(0.2, Vector3D(0,0,1));
+    ico.copyToList(*list, shapes);
+
+    //compoundTest test;
+    //test.copyToList(*list, shapes);
 }
 
 __device__ BackgroundColor* createDayTime() {
