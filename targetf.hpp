@@ -1,7 +1,7 @@
 #ifndef TARGET_CUDA_HPP
 #define TARGET_CUDA_HPP
 
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 #include "geometria.hpp"
 
 class Target{
