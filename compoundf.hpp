@@ -241,6 +241,32 @@ private:
     }
 };
 
+class Octahedron : public Compound{
+public:
+    __device__ Octahedron(const Vector3D& center, float radius)
+                : Compound(8) {makeOctahedron(center, radius);}
+
+private:
+    __device__ void makeOctahedron(const Vector3D& center, float radius) {
+        float R = radius;
+
+        Vector3D vertices[6] = {
+            Vector3D(1,0,0), Vector3D(0,1,0), Vector3D(0,0,1), Vector3D(-1,0,0), Vector3D(0,-1,0), Vector3D(0,0,-1)
+        };
+
+        int faces[8][3] = {
+            {0,1,2}, {1,2,3}, {2,3,4}, {0,2,4}, {0,1,5}, {1,3,5}, {3,4,5}, {0,4,5}
+        };
+
+        for(int i = 0; i < 8; i++) {
+            int v1 = faces[i][0], v2 = faces[i][1], v3 = faces[i][2];
+            Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
+            add(new Target(T));
+        }
+    }
+
+};
+
 
 
 
