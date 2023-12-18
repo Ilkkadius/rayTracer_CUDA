@@ -12,13 +12,22 @@ Shape* shape;
     __device__ Target(Shape* shape_) : shape(shape_) {}
 
     __device__ float collision(const Ray& ray) const {
-        if(shape == NULL) return -1.0f;
-
         return shape->rayCollision(ray);
     }
 
     __device__ Vector3D normal(const Vector3D& point) const {
         return shape->normal(point);
+    }
+
+    __device__ Vector3D centroid() const {
+        return shape->centroid();
+    }
+
+    __device__ void translate(const Vector3D& vec) {shape->translate(vec);}
+    __device__ void translate(float x, float y, float z) {shape->translate(x,y,z);}
+
+    __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
+        shape->rotate(angle, axis, axisPos);
     }
 
 
@@ -28,16 +37,36 @@ class targetList{
 public:
 
     Target** targets;
-    size_t size;
+    size_t size, capacity;
 
-    __device__ targetList(Target** targets_, int N) {
-        targets = targets_; size = N;
+    __device__ targetList(Target** targets_, int N, int maxN) {
+        targets = targets_; size = N, capacity = maxN;
     }
 
     __device__ targetList() : targets(NULL), size(0) {}
 
     __device__ Target operator[](int i) {
-        return **(targets + i); // or *(*targets + i) ?
+        return **(targets + i); // NOT *(*targets + i) ?
+    }
+
+    /**
+     * @brief Append a sequence of Targets to targetList, free given sequence
+     * 
+     * @param additional 
+     * @param amount 
+     * @return __device__ 
+     */
+    __device__ void append(Target** additional, size_t amount) {
+        for(size_t i = 0; i < amount; i++) {
+            if(size < capacity) {
+                targets[size] = additional[i];
+                size++;
+            } else {
+                delete additional[i]->shape;
+                delete additional[i];
+            }
+        }
+        delete[] additional;
     }
 
 };
