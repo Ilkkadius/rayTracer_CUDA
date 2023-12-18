@@ -50,6 +50,14 @@ __global__ void render(sf::Uint8 *pixels,
     int idx = width * j + i;
     curandState rand = randState[idx];
 
+    if(false && i % 100 == 0 && j % 75 == 0) {
+        Vector3D vec = aux::randUnitVec(&rand);
+        float l = vec.length();
+        if(vec.x < 0 && vec.y < 0 && vec.z < 0) {
+            printf("Vector (%f, %f, %f) of length %f\n", vec.x, vec.y, vec.z, l);
+        }
+    }
+
     
 
     Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
@@ -111,7 +119,7 @@ int main() {
     // #################################
 
     int width = 1920, height = 1080;
-    int depth = 5, samples = 1;
+    int depth = 5, samples = 100;
     int tx = 8, ty = 8;
 
     WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),
@@ -130,6 +138,7 @@ int main() {
     WindowVectors *cudaWindow = NULL;
     CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
     CHECK(cudaMemcpy(cudaWindow, &window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
+    std::cout << "Window ready" << std::endl;
 
 
 
@@ -137,28 +146,31 @@ int main() {
     CHECK(cudaMalloc(&background_d, sizeof(BackgroundColor*)));
     initializeBG<<<1,1>>>(background_d);
     CHECK(cudaDeviceSynchronize());
+    std::cout << "Background ready" << std::endl;
 
     curandState *randState_d;
     CHECK(cudaMalloc(&randState_d, width*height*sizeof(curandState)));
     initializeRand<<<blocks, threads>>>(randState_d, width, height);
     CHECK(cudaDeviceSynchronize());
+    std::cout << "Random states generated" << std::endl;
 
-    targetList** list; Target** targets; Shape** shapes; int N = 4;
+    targetList** list; Target** targets; Shape** shapes; int N = 50;
     CHECK(cudaMalloc(&list, sizeof(targetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
     initializeTargets<<<1,1>>>(targets, list, shapes, N);
     CHECK(cudaDeviceSynchronize());
+    std::cout << "Targets generated" << std::endl;
 
 
-    std::cout << "Starting GPU kernel..." << std::endl;
+    std::cout << "Starting GPU rendering..." << std::endl;
 
     render<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
                                 randState_d);
     CHECK(cudaDeviceSynchronize());
     
-    std::cout << "Successfully synchronized!" << std::endl;
+    std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
 
     //######################################
     // # GENERATE IMAGE, FREE MEMORY
