@@ -122,7 +122,7 @@ int main() {
     int depth = 5, samples = 100;
     int tx = 8, ty = 8;
 
-    WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),
+    WindowVectors window = initialRays(Vector3D(-2,0,0), Vector3D(1,0,0),
     1.0f, Vector3D(1,1,100), height, width, 0.8);
 
     // #################################
@@ -154,7 +154,7 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     std::cout << "Random states generated" << std::endl;
 
-    targetList** list; Target** targets; Shape** shapes; int N = 50;
+    targetList** list; Target** targets; Shape** shapes; int N = 70;
     CHECK(cudaMalloc(&list, sizeof(targetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
