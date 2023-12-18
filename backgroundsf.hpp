@@ -3,7 +3,7 @@
 
 #include <cuda_runtime.h>
 
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 #include "rayf.hpp"
 
 /**
@@ -23,7 +23,7 @@ public:
     __device__ dayTime(const Vector3D& color = Vector3D(0.3f,0.4f,1.0f)) : color_(color) {}
 
     __device__ Vector3D colorize(const Ray& ray) const {
-        float a = 0.5f*(ray.rayDir.z + 1.0f);
+        float a = 0.5f*(ray.dir.z + 1.0f);
         return (1.0f-a)*Vector3D(1, 1, 1) + a*color_;
     }
 
