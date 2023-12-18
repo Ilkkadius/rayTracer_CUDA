@@ -45,14 +45,19 @@ public:
         }
     }
 
+
     __device__ void release() {
         for(size_t i = 0; i < capacity; i++) {
             if(targets[i]) {
                 delete targets[i]->shape;
                 delete targets[i];
+                targets[i] = NULL;
             }
         }
-        delete[] targets;
+        if(targets) {
+            delete[] targets;
+            targets = NULL;
+        }
     }
 
     /**
@@ -63,7 +68,7 @@ public:
      * @return __device__ 
      */
     __device__ void copyToList(targetList* list, Shape** shapes) {
-        for(size_t i = 0; i < size; i++) {
+        for(int i = 0; i < size; i++) {
             if(list->size < list->capacity) {
                 list->targets[list->size] = targets[i];
                 shapes[list->size] = targets[i]->shape;
@@ -72,6 +77,17 @@ public:
             }
         }
         release();
+    }
+
+    __device__ void mergeCompound(Compound& c) {
+        for(int i = 0; i < c.size; i++) {
+            if(size < capacity) {
+                targets[size] = c.targets[i];
+                size++;
+                c.targets[i] = NULL;
+            }
+        }
+        c.release();
     }
 
     __device__ bool add(Target* target) {
@@ -170,6 +186,62 @@ private:
         }
     }
 };
+
+class Pentagon : public Compound{
+public:
+    __device__ Pentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5)
+            : Compound(3) {makePentagon(v1, v2, v3, v4, v5);}
+
+private:
+    __device__ void makePentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5) {
+        Triangle* T1 = new Triangle(v1, v2, v3);
+        Triangle* T2 = new Triangle(v1, v3, v4);
+        Triangle* T3 = new Triangle(v1, v4, v5);
+        add(new Target(T1)); add(new Target(T2)); add(new Target(T3));
+    }
+};
+
+class Dodecahedron : public Compound{
+public:
+    __device__ Dodecahedron(const Vector3D& center, float radius)
+                : Compound(36) {makeDodecahedron(center, radius);}
+
+private:
+    __device__ void makeDodecahedron(const Vector3D& center, float radius) {
+        float R = radius;
+
+        float permutations[4][2] = {{1.0f, 1.0f}, {-1.0f, 1.0f}, {1.0f, -1.0f}, {-1.0f, -1.0f}};
+        Vector3D vertices[20];
+
+        for(int i = 0; i < 4; i++) { // Generate each vertex of the dodecahedron (source: Wikipedia)
+            float p0 = permutations[i][0], p1 = permutations[i][1];
+            vertices[5*i] = Vector3D(0.0f, p0*phi, p1/phi);
+            vertices[5*i+1] = Vector3D(p0/phi, 0.0f, p1*phi);
+            vertices[5*i+2] = Vector3D(p0*phi, p1/phi, 0.0f);
+            vertices[5*i+3] = Vector3D(1.0f, p0, p1);
+            vertices[5*i+4] = Vector3D(-1.0f, p0, p1);
+        }
+        
+        int faces[12][5] = { // These numbers are found (painfully) by hand
+            {6,4,7,17,9}, {7,14,16,19,17}, 
+            {4,0,10,14,7}, {9,17,19,15,5},
+            {10,14,16,11,13}, {15,18,11,16,19}, 
+            {1,3,0,4,6}, {1,8,5,9,6},
+            {3,0,10,13,2}, {8,12,18,15,5}, 
+            {1,3,2,12,8}, {2,13,11,18,12}
+        };  // Indices of vertices in the vector "vertices" that form a single pentagon
+
+        for(int i = 0; i < 12; i++) {
+            int vv0 = faces[i][0], vv1 = faces[i][1], vv2 = faces[i][2], vv3 = faces[i][3], vv4 = faces[i][4];
+            Vector3D v1(R*vertices[vv0] + center), v2(R*vertices[vv1] + center), 
+                    v3(R*vertices[vv2] + center), v4(R*vertices[vv3] + center), v5(R*vertices[vv4] + center);
+            Pentagon p(v1, v2, v3, v4, v5);
+            mergeCompound(p);
+        }
+    }
+};
+
+
 
 
 #endif
