@@ -267,6 +267,33 @@ private:
 
 };
 
+class Cube : public Compound{
+public:
+    __device__ Cube(const Vector3D& center, float radius)
+        : Compound(12) {buildCube(center, radius);}
+
+private:
+    __device__ void buildCube(const Vector3D& center, float radius) {
+        float R = radius, d = 0.577350269f;
+
+        Vector3D v[8] = { // Vertices
+            Vector3D(d,d,d), Vector3D(-d,d,d), Vector3D(-d,-d,d), Vector3D(d,-d,d),
+            Vector3D(d,d,-d), Vector3D(-d,d,-d), Vector3D(-d,-d,-d), Vector3D(d,-d,-d)
+        };
+
+        int f[6][4] = { // Faces
+            {0,1,2,3}, {4,5,6,7}, {0,1,5,4}, {2,3,7,6}, {0,3,7,4}, {1,2,6,5}
+        };
+
+        for(int i = 0; i < 6; i++) {
+            Vector3D q0 = R*v[f[i][0]] + center, q1 = R*v[f[i][1]] + center, q2 = R*v[f[i][2]] + center, q3 = R*v[f[i][3]] + center;
+            Triangle* T1 = new Triangle(q0, q1, q2);
+            Triangle* T2 = new Triangle(q2, q3, q0);
+            add(new Target(T1)); add(new Target(T2));
+        }
+    }
+};
+
 
 
 
