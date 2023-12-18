@@ -5,15 +5,38 @@
 
 #include "targetf.hpp"
 #include "backgroundsf.hpp"
+#include "compoundf.hpp"
+#include "auxiliaryf.hpp"
 
-__device__ void createTargets(Target** targets, targetList** list, Shape** shapes) {
-    *(shapes) = new Sphere(Vector3D(7,0,0), 1);
-    *(shapes + 1) = new Sphere(Vector3D(0,0,-5000), 4999);
-    *(shapes + 2) = new Triangle(Vector3D(7,3,0), Vector3D(8,-3, 0), Vector3D(7,-1,5));
-    *(targets) = new Target(*shapes);
-    *(targets + 1) = new Target(*(shapes + 1));
-    *(targets + 2) = new Target(*(shapes + 2));
-    *list = new targetList(targets, 3);
+/*
+    printf("\033[31mDEBUG: id\033[0m\n");
+    int size = (**list).size;
+    printf("Number of objects: %d\n", size);
+    for(int i = 0; i < size; i++) {
+        Target* t1 = (**list).targets[i];
+        Target* t2 = targets[i];
+        Shape* s = shapes[i];
+        printf("Target from list: %p, from targets: %p and shape: %p\n", t1, t2, s);
+    }
+*/
+
+
+__device__ void createTargets(Target** targets, targetList** list, Shape** shapes, int N) {
+    float r = 100000;
+    shapes[0] = new Sphere(Vector3D(8,3,0), 1);
+    shapes[1] = new Sphere(Vector3D(0,0,-r), r-1);
+    //shapes[2] = new Triangle(Vector3D(7,3,0), Vector3D(8,-3, 0), Vector3D(7,-1,5));
+    targets[0] = new Target(shapes[0]);
+    targets[1] = new Target(shapes[1]);
+    //targets[2] = new Target(shapes[2]);
+    *list = new targetList(targets, 2, N);
+
+    Icosahedron ico(Vector3D(10,-2,2), 0.8f);
+    ico.rotate(0.2, Vector3D(0,0,1));
+    ico.copyToList(*list, shapes);
+
+    //compoundTest test;
+    //test.copyToList(*list, shapes);
 }
 
 __device__ BackgroundColor* createDayTime() {
