@@ -6,7 +6,7 @@
 #include <curand_kernel.h>
 
 #include "initializers.hpp"
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 #include "tracerf.hpp"
 #include "rayf.hpp"
 #include "backgroundsf.hpp"
@@ -105,10 +105,10 @@ __global__ void releaseTargets(Target** targets, targetList** list, Shape** shap
 // nvcc main.cu -o main -lsfml-graphics -lsfml-window -lsfml-system
 
 int main() {
+    auto start = std::chrono::high_resolution_clock::now();
     // #################################
     // # SET PROGRAM RUN PARAMETERS
     // #################################
-    auto start = std::chrono::high_resolution_clock::now();
 
     int width = 1920, height = 1080;
     int depth = 10, samples = 500;
