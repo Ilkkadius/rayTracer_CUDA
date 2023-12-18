@@ -154,7 +154,7 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     std::cout << "Random states generated" << std::endl;
 
-    targetList** list; Target** targets; Shape** shapes; int N = 50;
+    targetList** list; Target** targets; Shape** shapes; int N = 70;
     CHECK(cudaMalloc(&list, sizeof(targetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
