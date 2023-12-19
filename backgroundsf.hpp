@@ -30,4 +30,17 @@ public:
     Vector3D color_;
 };
 
+class nightTime : public BackgroundColor{
+public:
+
+    __device__ nightTime(const Vector3D& color = Vector3D(0.6,0.3,0.1)) : color_(color) {}
+
+    __device__ Vector3D colorize(const Ray& ray) const {
+        auto a = 0.5*(ray.dir.z + 1.0);
+        return (1.0-a)*color_ + a*Vector3D(0, 0, 0);
+    }
+
+    Vector3D color_;
+};
+
 #endif

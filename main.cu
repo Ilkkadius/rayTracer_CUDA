@@ -13,6 +13,8 @@
 #include "auxiliaryf.hpp"
 #include "targetf.hpp"
 #include "geometria.hpp"
+#include "cameraf.hpp"
+#include "logMethods.hpp"
 
 // PPC
 static inline void check(cudaError_t err, const char* context) {
@@ -76,7 +78,7 @@ __global__ void render(sf::Uint8 *pixels,
 
 __global__ void initializeBG(BackgroundColor** background) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
-        *background = createDayTime();
+        *background = createNightTime();
     }
 }
 
@@ -122,27 +124,38 @@ int main() {
     // # SET PROGRAM RUN PARAMETERS
     // #################################
 
+    Camera cam;
+
     int width = 1920, height = 1080;
-    int depth = 5, samples = 1;
+    int depth = 3, samples = 50;
     int tx = 8, ty = 8;
 
-    WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),
-    1.0f, Vector3D(1,1,100), height, width, 0.8);
+    cam.setFOV(80.0f);
+
+    cam.eye = Vector3D(0, 0, 0);
+    cam.direction = Vector3D(1, 0, 0);
+    cam.up = cam.direction + Vector3D(0, 0, 100);
 
     // #################################
     // # LOAD DATA TO DEVICE
     // #################################
+
+    cam.width = width; cam.height = height;
+    cam.depth = depth; cam.samples = samples;
+
+    cam.check();
+    cam.initializeWindow();
+
+    WindowVectors *cudaWindow = NULL;
+    CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
+    CHECK(cudaMemcpy(cudaWindow, &cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
+    std::cout << "Window ready" << std::endl;
 
     dim3 blocks(divup(width, tx), divup(height, ty));
     dim3 threads(tx, ty);
 
     sf::Uint8 *pixels;// = new sf::Uint8[width*height*4];
     CHECK(cudaMallocManaged(&pixels, width*height*4));
-
-    WindowVectors *cudaWindow = NULL;
-    CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
-    CHECK(cudaMemcpy(cudaWindow, &window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
-    std::cout << "Window ready" << std::endl;
 
 
 
@@ -158,7 +171,7 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     std::cout << "Random states generated" << std::endl;
 
-    targetList** list; Target** targets; Shape** shapes; int N = 70;
+    targetList** list; Target** targets; Shape** shapes; int N = 95;
     CHECK(cudaMalloc(&list, sizeof(targetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
