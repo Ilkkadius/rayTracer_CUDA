@@ -56,7 +56,7 @@ __host__ std::string getDuration(double duration, int precision = 2) {
 
 __host__ std::string getImageFilename(int width, int height, int samples, double duration) {
     std::stringstream ss;
-    ss << width << "x" << height << "_" << samples << "samples_" << getDuration(duration);
+    ss << width << "x" << height << "_" << samples << "samples_" << getDuration(duration, 0);
     return getRawDate() + "_GPU_" + ss.str() + "_figure.png";
 }
 
