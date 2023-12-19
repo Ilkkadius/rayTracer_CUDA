@@ -10,6 +10,8 @@
 
 class Shape{
 public:
+    Vector3D minBox, maxBox;
+
     __device__ virtual Vector3D normal(const Vector3D& point) const = 0;
 
     __device__ virtual float rayCollision(const Ray& ray) const = 0;
@@ -36,7 +38,9 @@ public:
     Vector3D center;
     float radius;
 
-    __device__ Sphere(const Vector3D& center_, float radius_) : center(center_), radius(radius_) {}
+    __device__ Sphere(const Vector3D& center_, float radius_) : center(center_), radius(radius_) {
+        buildBox();
+    }
 
     __device__ Vector3D normal(const Vector3D& point) const {
         return unitVec(point - center);
@@ -63,16 +67,22 @@ public:
     __device__ Vector3D centroid() const {return center;}
 
     __device__ void translate(const Vector3D& vec) {
-        center += vec;
+        center += vec; buildBox();
     }
     __device__ void translate(float x, float y, float z) {
-        translate(Vector3D(x,y,z));
+        translate(Vector3D(x,y,z)); buildBox();
     }
 
     __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
-        center = rotateVec(center, angle, axis, axisPos);
+        center = rotateVec(center, angle, axis, axisPos); buildBox();
     }
 
+private:
+
+    __device__ void buildBox() {
+        Vector3D r(radius, radius, radius);
+        minBox = center - r; maxBox = center + r;
+    }
 
 
 };
@@ -81,7 +91,9 @@ class Triangle : public Shape{
 public:
     Vector3D v0, v1, v2;
 
-    __device__ Triangle(const Vector3D& vertex0, const Vector3D& vertex1, const Vector3D& vertex2) : v0(vertex0), v1(vertex1), v2(vertex2) {}
+    __device__ Triangle(const Vector3D& vertex0, const Vector3D& vertex1, const Vector3D& vertex2) : v0(vertex0), v1(vertex1), v2(vertex2) {
+        buildBox();
+    }
 
     __device__ Vector3D normal(const Vector3D& point) const {
         return unitVec(Cross(v1-v0, v2-v0));
@@ -124,18 +136,25 @@ public:
     }
 
     __device__ void translate(const Vector3D& vec) {
-        v0 += vec; v1 += vec; v2 += vec;
+        v0 += vec; v1 += vec; v2 += vec; buildBox();
     }
     __device__ void translate(float x, float y, float z) {
-        translate(Vector3D(x,y,z));
+        translate(Vector3D(x,y,z)); buildBox();
     }
 
     __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
         v0 = rotateVec(v0, angle, axis, axisPos);
         v1 = rotateVec(v1, angle, axis, axisPos);
         v2 = rotateVec(v2, angle, axis, axisPos);
+        buildBox();
     }
 
+private:
+
+    __device__ void buildBox() {
+        minBox = minVector(v2, minVector(v0, v1));
+        maxBox = maxVector(v2, maxVector(v0, v1));
+    }
 
 };
 
