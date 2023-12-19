@@ -50,6 +50,8 @@ __global__ void render(sf::Uint8 *pixels,
     int idx = width * j + i;
     curandState rand = randState[idx];
 
+    Vector3D color(255,255, 255);
+
     if(false && i % 100 == 0 && j % 75 == 0) {
         Vector3D vec = aux::randUnitVec(&rand);
         float l = vec.length();
@@ -59,8 +61,10 @@ __global__ void render(sf::Uint8 *pixels,
     }
 
     
-
-    Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
+    //if(i % 255 == 0 & j % 150 == 0) {
+        color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
+    //}
+    
 
     
 
@@ -119,7 +123,7 @@ int main() {
     // #################################
 
     int width = 1920, height = 1080;
-    int depth = 5, samples = 1000;
+    int depth = 5, samples = 1;
     int tx = 8, ty = 8;
 
     WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),

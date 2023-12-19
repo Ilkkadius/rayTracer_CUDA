@@ -7,20 +7,20 @@
 
 class HitInfo{
 public:
-    Vector3D point, normal;
-    Ray ray;
+    Vector3D point, normal, rayDir;
     float t;
+    Target* target;
 
-    __device__ HitInfo() : ray(Ray()), point(Vector3D()), normal(Vector3D()), t(-1.0f) {}
+    __device__ HitInfo() : rayDir(Vector3D()), point(Vector3D()), normal(Vector3D()), t(-1.0f) {}
 
-    __device__ HitInfo(const Ray& ray_, const Vector3D& point_, const Vector3D& normal_, float t_)
-     : ray(ray_), point(point_), t(t_) {
-        if(Dot(ray_.dir, normal_) > 0.0f) { // Make sure the normal points outwards!
-            normal = -normal_;
+    __device__ HitInfo(const Vector3D& rayDirection, const Vector3D& hitPoint, const Vector3D& surfaceNormal, float t_, Target* target_)
+    : rayDir(rayDirection), point(hitPoint), t(t_), target(target_) {
+        if(Dot(rayDirection, surfaceNormal) > 0.0f) { // Make sure the normal points outwards!
+            normal = -surfaceNormal;
         } else {
-            normal = normal_;
+            normal = surfaceNormal;
         }
-     }
+    }
     
 
 };
