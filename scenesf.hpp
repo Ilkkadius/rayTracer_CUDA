@@ -8,19 +8,19 @@
 namespace Scene{
 
     __device__ void testScene(targetList** list, Target** targets, Shape** shapes, int capacity) {
-        float r = 500;
-        Vector3D red(1,0.1,0.1), green(0.1,1,0.1), blue(0.85,0.85,0.9), white(1,1,1), black(0,0,0);
-        shapes[0] = new Sphere(Vector3D(8,3,0), 1);
-        shapes[1] = new Sphere(Vector3D(0,0,-r-1), r);
+        //float r = 500;
+        Vector3D red(0.9,0.1,0.1), green(0.1,0.9,0.1), blue(0.1,0.1,0.9), white(1,1,1), black(0,0,0);
 
-        targets[0] = new Target(shapes[0], blue, 50.0f);
-        targets[1] = new Target(shapes[1], blue);
+        shapes[0] = new Sphere(Vector3D(3,29,30), 15);
+        targets[0] = new Target(shapes[0], Vector3D(1,1,1), 20);
+
+        shapes[1] = new Sphere(Vector3D(10,3,1), 1);
+        targets[1] = new Target(shapes[1], green);
+
+        shapes[2] = new Sphere(Vector3D(10,-3,1), 1);
+        targets[2] = new Target(shapes[2], blue);
         
-        *list = new targetList(targets, 2, capacity);
-
-        Cube ico(Vector3D(10,-2,2), 0.8f, green);
-        ico.rotate(1.5f, Vector3D(0,0,1));
-        ico.copyToList(*list, shapes);
+        *list = new targetList(targets, 3, capacity);
     }
 
     __device__ void Platon(targetList** list, Target** targets, Shape** shapes, int capacity) {
