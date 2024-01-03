@@ -14,7 +14,7 @@
 #include "tracerf.hpp"
 #include "rotationf.hpp"
 #include "cameraf.hpp"
-#include "renderKernels.hpp"
+#include "kernelSet.hpp"
 
 #define CHECK_FUNC
 static inline void check(cudaError_t err, const char* context) {

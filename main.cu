@@ -18,7 +18,7 @@
 #include "imageBackupf.hpp"
 #include "BVHf.hpp"
 
-#include "renderKernels.hpp"
+#include "kernelSet.hpp"
 
 #include "realtimeRenderf.hpp"
 
@@ -45,70 +45,10 @@ static inline void check(cudaError_t err, const char* context) {
 //    return divup(a, b) * b;
 //}
 
-//###############################################################
-
-
-
-__global__ void initializeBG(BackgroundColor** background) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        *background = createNightTime();
-    }
-}
-
-__global__ void initializeTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        createTargets(targets, list, shapes, capacity);
-    }
-}
-
-__global__ void initializeBVH(targetList** listptr, Target** targets, Shape** shapes, BVHTree* tree, int capacity) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        createTargets(targets, listptr, shapes, capacity);
-        *tree = BVHTree(listptr);
-    }
-}
-
-__global__ void initializeRand(curandState* randState, int width, int height, int seed = 1889) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
-    if(i >= width || j >= height) return;
-    int idx = i + width * j;
-    curand_init(seed, idx, 0, &randState[idx]);
-}
-
-
-__global__ void releaseBG(BackgroundColor** background) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        delete *background;
-    }
-}
-
-__global__ void releaseTargets(Target** targets, targetList** list, Shape** shapes) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        targetList l = **list;
-        for(int i = 0; i < l.size; i++) {
-            delete *(targets + i);
-            delete *(shapes + i);
-        }
-        delete *list;
-    }
-}
-
-__global__ void releaseBVH(Target** targets, targetList** list, Shape** shapes, BVHTree* tree) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        targetList l = **list;
-        for(int i = 0; i < l.size; i++) {
-            delete *(targets + i);
-            delete *(shapes + i);
-        }
-        delete *list;
-        tree->clear();
-    }
-}
 
 // ################################################################
 
-// nvcc main.cu renderKernels.cu -o main -lsfml-graphics -lsfml-window -lsfml-system
+// nvcc main.cu -o main -lsfml-graphics -lsfml-window -lsfml-system
 
 int main() {
     // #################################
@@ -122,7 +62,7 @@ int main() {
     int tx = 8, ty = 8;
     bool backup = false;
     int partition = 0;
-    bool realTime = true;
+    bool realTime = false;
 
     cam.setFOV(80.0f);
 
