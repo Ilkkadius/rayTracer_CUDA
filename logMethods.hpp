@@ -16,19 +16,13 @@ __host__ std::string zero2front(int a)
  * @brief e.g. 1. Jan. 2023: 20:30:15
  */
 __host__ std::string getDate() {
-    int h, m, s, dd, yy;
-    char d;
-    std::string mm;
-    std::stringstream time(__TIME__);
-    std::stringstream date(__DATE__);
-
-    time >> h >> d >> m >> d >> s;
-    date >> mm >> dd >> yy;
-
-    std::stringstream().swap(date);
-    date << dd << ". " << mm << ". " << yy << ": " << zero2front(h) << h << ":" << zero2front(m) << m << ":" << zero2front(s) << s;
-    //dd. <Month>. yyyy: hh:mm:ss
-    return date.str();
+    auto t = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(t);
+    tm* timeInfo = localtime(&tt);
+    char buffer[24];
+    const std::string format = "%e. %h. %Y: %T";
+    strftime(buffer, sizeof(buffer), format.c_str(), timeInfo);
+    return std::string(buffer);
 }
 
 __host__ int getMonthNumber(const std::string& month) {
@@ -59,21 +53,13 @@ __host__ int getMonthNumber(const std::string& month) {
  * @brief e.g. 231231_2359
  */
 __host__ std::string getRawDate() {
-    int h, m, s, dd, yy;
-    char d;
-    std::string month;
-    std::stringstream time(__TIME__);
-    std::stringstream date(__DATE__);
-
-    time >> h >> d >> m >> d >> s;
-    date >> month >> dd >> yy;
-    int mm = getMonthNumber(month);
-
-    yy = yy % 100;
-
-    std::stringstream rawDate;
-    rawDate << zero2front(yy) << yy << zero2front(mm) << mm << zero2front(dd) << dd << "_" << zero2front(h) << h << zero2front(m) << m;
-    return rawDate.str();
+    auto t = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(t);
+    tm* timeInfo = localtime(&tt);
+    char buffer[13];
+    const std::string format = "%y%m%d_%H%M";
+    strftime(buffer, sizeof(buffer), format.c_str(), timeInfo);
+    return std::string(buffer);
 }
 
 /**
@@ -102,6 +88,10 @@ std::string getDuration(double duration) {
     return runtime.str();
 }
 
+/**
+ * @brief e.g. 1920x1080
+ * 
+ */
 std::string getImageDimensions(int width, int height) {
     return std::to_string(width) + "x" + std::to_string(height);
 }
