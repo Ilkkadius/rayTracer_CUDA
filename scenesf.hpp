@@ -23,6 +23,10 @@ namespace Scene{
         *list = new targetList(targets, 3, capacity);
     }
 
+    __device__ void empty(targetList** list, Target** targets, Shape** shapes, int capacity) {
+        *list = new targetList(targets, 0, capacity);
+    }
+
     __device__ void Platon(targetList** list, Target** targets, Shape** shapes, int capacity) {
 
         shapes[0] = new Sphere(Vector3D(3,29,30), 15);
@@ -50,6 +54,7 @@ namespace Scene{
         cube.copyToList(*list, shapes);
 
     }
+
 
 };
 

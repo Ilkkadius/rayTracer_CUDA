@@ -9,6 +9,21 @@
 static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will occur
 static constexpr float phi = 1.61803f;
 
+#define CHECK_FUNC
+static inline void check(cudaError_t err, const char* context) {
+    if (err != cudaSuccess) {
+        std::cerr << "CUDA error: " << context << ": "
+            << cudaGetErrorString(err) << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+}
+#define CHECK(x) check(x, #x)
+
+#define divup_FUNC
+
+static inline int divup(int a, int b) {
+    return (a + b - 1)/b;
+}
 
 namespace aux{
 
@@ -45,6 +60,50 @@ namespace aux{
     }
 
 }
+
+    template <typename T>
+    class dynVec{
+    public:
+        
+        __host__ __device__ dynVec(int reserve) : size_(0), capacity_(reserve), arr(new T[reserve*sizeof(T)]) {}
+
+        __host__ __device__ void push_back(T elem) {
+            if(size_ >= capacity_) {
+                grow();
+            }
+            arr[size_++] = elem;
+        }
+
+        __host__ __device__ ~dynVec() {
+            delete[] arr;
+        }
+
+        __host__ __device__ T operator[](int i) const {return arr[i];}
+
+        __host__ __device__ size_t size() const {return size_;}
+
+        __host__ __device__ size_t capacity() const {return capacity_;}
+
+        __host__ __device__ const T* getArray() {
+            return arr;
+        }
+
+    private:
+        size_t size_, capacity_;
+        T* arr;
+
+        __host__ __device__ void grow() {
+            T* big = new T[capacity_*sizeof(T) << 1];
+            capacity_ = capacity_ << 1;
+
+            for(int i = 0; i < size_; i++) {
+                big[i] = arr[i];
+            }
+
+            delete[] arr;
+            arr = big;
+        }
+    };
 
 
 #endif
