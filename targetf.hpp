@@ -51,43 +51,5 @@ float emissivity;
 
 };
 
-class targetList{
-public:
-
-    Target** targets;
-    size_t size, capacity;
-
-    __device__ targetList(Target** targets_, int N, int maxN) {
-        targets = targets_; size = N; capacity = maxN;
-    }
-
-    __device__ targetList(int capacity_) : targets(NULL), size(0), capacity(capacity_) {}
-
-    __device__ Target* operator[](int i) {
-        return *(targets + i); // NOT *(*targets + i) ?
-    }
-
-    /**
-     * @brief Append a sequence of Targets to targetList, free given sequence
-     * 
-     * @param additional 
-     * @param amount 
-     * @return __device__ 
-     */
-    __device__ void append(Target** additional, size_t amount) {
-        for(size_t i = 0; i < amount; i++) {
-            if(size < capacity) {
-                targets[size] = additional[i];
-                size++;
-            } else {
-                delete additional[i]->shape;
-                delete additional[i];
-            }
-        }
-        delete[] additional;
-    }
-
-};
-
 
 #endif

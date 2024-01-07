@@ -11,12 +11,12 @@
 #include "rayf.hpp"
 #include "backgroundsf.hpp"
 #include "auxiliaryf.hpp"
-#include "targetf.hpp"
+#include "targetList.hpp"
 #include "geometria.hpp"
 #include "cameraf.hpp"
 #include "logMethods.hpp"
 #include "imageBackupf.hpp"
-//#include "BVHf.hpp"
+#include "BVHf.hpp"
 #include "fileOperations.hpp"
 
 #include "kernelSet.hpp"
@@ -64,7 +64,7 @@ int main() {
     bool backup = false;
     int partition = 0;
     bool realTime = true;
-    bool fileRead = true;
+    bool fileRead = false;
 
     cam.setFOV(80.0f);
 
@@ -133,15 +133,22 @@ int main() {
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
     initializeTargets<<<1,1>>>(targets, list, shapes, N);
     CHECK(cudaDeviceSynchronize());
+    
     if(fileRead) {
         FileOperations::TargetsFromFile("teapot.obj", list, shapes);
         CHECK(cudaDeviceSynchronize());
     }
     
+    BVHTree** tree;
+    CHECK(cudaMalloc(&tree, sizeof(BVHTree*)));
+    CHECK(cudaDeviceSynchronize());
+    buildBVH<<<1,1>>>(list, tree);
+    CHECK(cudaDeviceSynchronize());
+    
     std::cout << "Targets generated" << std::endl;
 
     if(realTime) {
-        realtimeRender::startCamera(cam, list, background_d, randState_d, eye, direction, up);
+        realtimeRender::startCamera(cam, tree, background_d, randState_d, eye, direction, up); // TREE
         return 0;
     }
 
@@ -159,8 +166,8 @@ int main() {
 
     if(partition == 0) {
 
-        completeRender<<<blocks, threads>>>(pixels, width, height, depth, samples,
-                                list, background_d, cudaWindow, 
+        completeRender<<<blocks, threads>>>(pixels, width, height, depth, samples, // TREE
+                                tree, background_d, cudaWindow, 
                                 randState_d);
         CHECK(cudaDeviceSynchronize());
 
@@ -246,34 +253,6 @@ int main() {
             Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 3);
         }
 
-    } else if(partition == 3) {
-        int parts = 100;
-        int partSamples = samples/parts;
-        //bool showWindow = true;
-
-        std::string cumulativeBackupPathStem(getRawDate() + "_" + getImageDimensions(width, height) 
-                            + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup");
-
-        for(int i = 0; i < parts; i++) {
-            cumulativeRender<<<blocks, threads>>>(pixels, width, height, depth, partSamples,
-                                list, background_d, cudaWindow, 
-                                randState_d, i);
-            CHECK(cudaDeviceSynchronize());
-
-            initializeRand<<<blocks, threads>>>(randState_d, width, height, rand());
-            CHECK(cudaDeviceSynchronize()); // Random numbers have to be regenerated as the rendering kernel runs through the same pixels
-
-            if(backup) {
-                for(int j = 0; j < width; j++) {
-                    Backup::imageToBinary(cumulativeBackupPathStem + "_p" + std::to_string(i+1) + ".bin", pixels, j, width, height);
-                }
-            }
-
-            end = std::chrono::high_resolution_clock::now();
-            duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-
-            std::cout << "Part " << i+1 << "/" << parts << " done. Time so far: " << getDuration(duration) << std::endl;
-        }
     }
 
     //Backup::fullImageToText(backupTextPath, pixels, width, height);
