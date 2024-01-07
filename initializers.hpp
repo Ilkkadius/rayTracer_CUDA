@@ -50,10 +50,15 @@ namespace Initializer{
         std::cout << "Random states generated" << std::endl;
     }
 
-    __host__ void BVHStructure(BVHTree*** tree, targetList** list) {
+    __host__ void BVH(BVHTree*** tree, targetList** list) {
         CHECK(cudaMalloc(tree, sizeof(BVHTree*)));
         CHECK(cudaDeviceSynchronize());
         buildBVH<<<1,1>>>(list, *tree);
+        CHECK(cudaDeviceSynchronize());
+    }
+
+    __host__ void CompoundsToTargets(Compound** compounds, size_t compoundCount, targetList** list, Shape** shapes) {
+        addCompoundsToTargetlist<<<1,1>>>(compounds, compoundCount, list, shapes);
         CHECK(cudaDeviceSynchronize());
     }
 }
