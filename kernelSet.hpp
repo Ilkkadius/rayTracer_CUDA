@@ -7,7 +7,7 @@
 #include "targetf.hpp"
 #include "backgroundsf.hpp"
 #include "tracerf.hpp"
-#include "creators.hpp"
+#include "kernelMethods.hpp"
 
     __global__ void completeRender(sf::Uint8 *pixels, 
         int width, int height, 
@@ -254,13 +254,13 @@
 
     __global__ void initializeBG(BackgroundColor** background) {
         if(threadIdx.x == 0 && blockIdx.x == 0) {
-            *background = Creator::background();
+            *background = KernelMethods::createBackground();
         }
     }
 
     __global__ void initializeTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
         if(threadIdx.x == 0 && blockIdx.x == 0) {
-            Creator::targetScene(targets, list, shapes, capacity);
+            KernelMethods::createScene(targets, list, shapes, capacity);
         }
     }
 

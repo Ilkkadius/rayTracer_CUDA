@@ -76,19 +76,8 @@ int main() {
     // # LOAD DATA TO DEVICE
     // #################################
 
-    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
-    std::cout << "\033[0;93m#        Ray tracer (GPU)       #\033[0m" << std::endl;
-    std::cout << "\033[0;93m# Date: " << getDate() << " #\033[0m" << std::endl;
-    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
-
-    std::cout << "Resolution: " << width << "x" << height << ", N = " << samples << ", recursion = " << depth << std::endl;
-    std::cout << "Backup to file: " << (backup ? "\033[1;32m" : "\033[1;31m") << std::boolalpha << backup << "\033[0m" << std::endl;
-
     cam.width = width; cam.height = height;
     cam.depth = depth; cam.samples = samples;
-
-    cam.check();
-    cam.initializeWindow();
 
     if(partition < 0 || partition > 3) {
         std::cout << "ERROR: Invalid partition value" << std::endl;
@@ -103,14 +92,13 @@ int main() {
     WindowVectors *cudaWindow;
     Initializer::Window(cudaWindow, cam);
 
+    printStartInfo(cam.width, cam.height, cam.samples, cam.depth, backup);
 
     dim3 blocks(divup(width, tx), divup(height, ty));
     dim3 threads(tx, ty);
 
-
     sf::Uint8 *pixels;
     CHECK(cudaMallocManaged(&pixels, width*height*4));
-
 
     BackgroundColor** background_d;
     Initializer::Background(&background_d);
@@ -130,15 +118,15 @@ int main() {
         FileOperations::TargetsFromFile("teapot.obj", list, shapes);
         CHECK(cudaDeviceSynchronize());
     }
-
+    // Another way to add targets from file:
     Compound** compounds; size_t compoundCount;
     CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
     CHECK(cudaDeviceSynchronize());
     //FileOperations::CompoundsFromFile("teapot.obj", compounds, compoundCount);
-    //addCompoundsToTargetlist<<<1,1>>>(compounds, 1, list, shapes);
+    //Initializer::CompoundsToTargets(compounds, 1, list, shapes);
     
     BVHTree** tree;
-    Initializer::BVHStructure(&tree, list);
+    Initializer::BVH(&tree, list);
     
     std::cout << "Targets generated" << std::endl;
 
@@ -198,26 +186,26 @@ int main() {
 
     } else if(partition == 2) {
 
-        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-        //                        list, background_d, cudaWindow, 
-        //                        randState_d, 0);
-        //CHECK(cudaDeviceSynchronize());
+        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, 0);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
+            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
         }
 
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
         std::cout << "25% rendered, time so far: " << getDuration(duration) << std::endl;
 
-        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-        //                        list, background_d, cudaWindow, 
-        //                        randState_d, 1);
-        //CHECK(cudaDeviceSynchronize());
+        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, 1);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
+            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
         }
 
         auto prevDuration = duration;
@@ -250,7 +238,7 @@ int main() {
 
     }
 
-    //Backup::fullImageToText(backupTextPath, pixels, width, height);
+    
     if(backup)
         Backup::fullImageToBinary(pixels, width, height);
     
