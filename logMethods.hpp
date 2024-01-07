@@ -7,6 +7,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "cameraf.hpp"
+
 __host__ std::string zero2front(int a)
 {
     return a >= 10 ? "" : "0";
@@ -102,6 +104,16 @@ __host__ std::string getImageFilename(int width, int height, int samples, double
     return getRawDate() + "_GPU_" + ss.str() + "_figure.png";
 }
 
-    
+__host__ void printStartInfo(int width, int height, int samples, int depth, bool backup) {
+    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
+    std::cout << "\033[0;93m#        Ray tracer (GPU)       #\033[0m" << std::endl;
+    std::cout << "\033[0;93m# Date: " << getDate() << " #\033[0m" << std::endl;
+    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
+
+    std::cout << "Resolution: " << width << "x" << height << ", N = " << samples << ", recursion = " << depth << std::endl;
+    std::cout << "Backup to file: " << (backup ? "\033[1;32m" : "\033[1;31m") << std::boolalpha << backup << "\033[0m" << std::endl;
+}
+
+
 
 #endif

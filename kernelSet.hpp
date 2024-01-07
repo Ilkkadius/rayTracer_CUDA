@@ -7,6 +7,7 @@
 #include "targetf.hpp"
 #include "backgroundsf.hpp"
 #include "tracerf.hpp"
+#include "kernelMethods.hpp"
 
     __global__ void completeRender(sf::Uint8 *pixels, 
         int width, int height, 
@@ -226,15 +227,40 @@
         }
     }
 
+    __global__ void generateCompounds(Compound** list, Vector3D* vertices, int* fVertices, Vector3D* fColors, size_t fCount, Vector3D* defaultColor) {
+        if(threadIdx.x == 0 && blockIdx.x == 0) {
+            Vector3D color, v1, v2, v3;
+            Compound* fileCompound = new Compound(fCount);
+            for(size_t i = 0; i < fCount; i++) {
+                int idx = 3*i;
+                int v[3] = {fVertices[idx], fVertices[idx + 1], fVertices[idx + 2]};
+                color = (fColors[i].x >= 0 && fColors[i].y >= 0 && fColors[i].z >= 0) ? fColors[i] : *defaultColor; // Fix this!
+
+                v1 = vertices[v[0]], v2 = vertices[v[1]], v3 = vertices[v[2]];
+                Triangle* T = new Triangle(v1, v2, v3);
+                fileCompound->add(new Target(T, color));
+            }
+            *list = fileCompound;
+        }
+    }
+
+    __global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCount, targetList** list, Shape** shapes) {
+        if(threadIdx.x == 0 && blockIdx.x == 0) {
+            for(int i = 0; i < compoundCount; i++) {
+                compounds[i]->copyToList(*list, shapes);
+            }
+        }
+    }
+
     __global__ void initializeBG(BackgroundColor** background) {
         if(threadIdx.x == 0 && blockIdx.x == 0) {
-            *background = createBackground();
+            *background = KernelMethods::createBackground();
         }
     }
 
     __global__ void initializeTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
         if(threadIdx.x == 0 && blockIdx.x == 0) {
-            createTargets(targets, list, shapes, capacity);
+            KernelMethods::createScene(targets, list, shapes, capacity);
         }
     }
 

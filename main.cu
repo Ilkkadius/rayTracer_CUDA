@@ -76,19 +76,8 @@ int main() {
     // # LOAD DATA TO DEVICE
     // #################################
 
-    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
-    std::cout << "\033[0;93m#        Ray tracer (GPU)       #\033[0m" << std::endl;
-    std::cout << "\033[0;93m# Date: " << getDate() << " #\033[0m" << std::endl;
-    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
-
-    std::cout << "Resolution: " << width << "x" << height << ", N = " << samples << ", recursion = " << depth << std::endl;
-    std::cout << "Backup to file: " << (backup ? "\033[1;32m" : "\033[1;31m") << std::boolalpha << backup << "\033[0m" << std::endl;
-
     cam.width = width; cam.height = height;
     cam.depth = depth; cam.samples = samples;
-
-    cam.check();
-    cam.initializeWindow();
 
     if(partition < 0 || partition > 3) {
         std::cout << "ERROR: Invalid partition value" << std::endl;
@@ -100,31 +89,22 @@ int main() {
     std::string backupTextPath = "" + getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
                             + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.txt";
 
-    WindowVectors *cudaWindow = NULL;
-    CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
-    CHECK(cudaMemcpy(cudaWindow, &cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
-    std::cout << "Window ready" << std::endl;
+    WindowVectors *cudaWindow;
+    Initializer::Window(cudaWindow, cam);
 
+    printStartInfo(cam.width, cam.height, cam.samples, cam.depth, backup);
 
     dim3 blocks(divup(width, tx), divup(height, ty));
     dim3 threads(tx, ty);
 
-
     sf::Uint8 *pixels;
     CHECK(cudaMallocManaged(&pixels, width*height*4));
 
-
     BackgroundColor** background_d;
-    CHECK(cudaMalloc(&background_d, sizeof(BackgroundColor*)));
-    initializeBG<<<1,1>>>(background_d);
-    CHECK(cudaDeviceSynchronize());
-    std::cout << "Background ready" << std::endl;
+    Initializer::Background(&background_d);
 
     curandState *randState_d;
-    CHECK(cudaMalloc(&randState_d, width*height*sizeof(curandState)));
-    initializeRand<<<blocks, threads>>>(randState_d, width, height);
-    CHECK(cudaDeviceSynchronize());
-    std::cout << "Random states generated" << std::endl;
+    Initializer::RandomStates(&randState_d, cam.width, cam.height, blocks, threads);
 
 
     targetList** list; Target** targets; Shape** shapes; int N = 2000;
@@ -138,12 +118,15 @@ int main() {
         FileOperations::TargetsFromFile("teapot.obj", list, shapes);
         CHECK(cudaDeviceSynchronize());
     }
+    // Another way to add targets from file:
+    Compound** compounds; size_t compoundCount;
+    CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
+    CHECK(cudaDeviceSynchronize());
+    //FileOperations::CompoundsFromFile("teapot.obj", compounds, compoundCount);
+    //Initializer::CompoundsToTargets(compounds, 1, list, shapes);
     
     BVHTree** tree;
-    CHECK(cudaMalloc(&tree, sizeof(BVHTree*)));
-    CHECK(cudaDeviceSynchronize());
-    buildBVH<<<1,1>>>(list, tree);
-    CHECK(cudaDeviceSynchronize());
+    Initializer::BVH(&tree, list);
     
     std::cout << "Targets generated" << std::endl;
 
@@ -203,26 +186,26 @@ int main() {
 
     } else if(partition == 2) {
 
-        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-        //                        list, background_d, cudaWindow, 
-        //                        randState_d, 0);
-        //CHECK(cudaDeviceSynchronize());
+        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, 0);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
+            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
         }
 
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
         std::cout << "25% rendered, time so far: " << getDuration(duration) << std::endl;
 
-        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-        //                        list, background_d, cudaWindow, 
-        //                        randState_d, 1);
-        //CHECK(cudaDeviceSynchronize());
+        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, 1);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
+            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
         }
 
         auto prevDuration = duration;
@@ -255,7 +238,7 @@ int main() {
 
     }
 
-    //Backup::fullImageToText(backupTextPath, pixels, width, height);
+    
     if(backup)
         Backup::fullImageToBinary(pixels, width, height);
     
@@ -295,11 +278,13 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaFree(background_d));
 
-    releaseTargets<<<1,1>>>(targets, list, shapes);
+    //releaseTargets<<<1,1>>>(targets, list, shapes);
+    releaseBVH<<<1,1>>>(targets, list, shapes, *tree);
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaFree(targets));
     CHECK(cudaFree(list));
     CHECK(cudaFree(shapes));
+    CHECK(cudaFree(tree));
 
 
 
