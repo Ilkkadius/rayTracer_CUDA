@@ -8,23 +8,15 @@
 #include "rayf.hpp"
 #include "backgroundsf.hpp"
 #include "scatteringf.hpp"
-#include "targetf.hpp"
+#include "targetList.hpp"
 #include "auxiliaryf.hpp"
 #include "BVHf.hpp"
 
-__device__ HitInfo closestHit(const Ray& ray, targetList** listptr) {
-    HitInfo info;
-    targetList list = **listptr;
-    for(int i = 0; i < list.size; i++) {
-        Target* target = list[i];
-        float u = target->collision(ray);
-        if(u > epsilon) {
-            if(info.t > u || info.t < 0.0f) {
-                info = HitInfo(ray.dir, ray.at(u), target->normal(ray.at(u)), u, target);
-            }
-        }
-    }
-    return info;
+
+__device__ HitInfo closestHit(const Ray& ray, targetList* listptr) {
+    HitInfo hit;
+    listptr->findCollision(ray, hit);
+    return hit;
 }
 
 __device__ HitInfo closestHit(const Ray& ray, BVHTree* tree) {
@@ -39,7 +31,7 @@ __device__ Vector3D Trace(const Ray& ray, targetList** listptr, BackgroundColor*
     HitInfo info;
 
     for(int i = 0; i < depth; i++) {
-        info = closestHit(current, listptr);
+        info = closestHit(current, *listptr);
 
         if(info.t > epsilon) {
             if(info.target->isRadiant()) {
@@ -90,7 +82,6 @@ __device__ Vector3D Trace(const Ray& ray, BVHTree* tree, BackgroundColor* backgr
 }
 
 
-
 __device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, targetList** listptr, 
                         int depth, int samples, BackgroundColor* background, curandState randState) {
     Vector3D color;
@@ -130,5 +121,6 @@ __device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, BVHTree* 
     }
     return color;
 }
+
 
 #endif
