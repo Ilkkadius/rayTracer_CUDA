@@ -100,10 +100,8 @@ int main() {
     std::string backupTextPath = "" + getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
                             + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.txt";
 
-    WindowVectors *cudaWindow = NULL;
-    CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
-    CHECK(cudaMemcpy(cudaWindow, &cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
-    std::cout << "Window ready" << std::endl;
+    WindowVectors *cudaWindow;
+    Initializer::Window(cudaWindow, cam);
 
 
     dim3 blocks(divup(width, tx), divup(height, ty));
@@ -115,16 +113,10 @@ int main() {
 
 
     BackgroundColor** background_d;
-    CHECK(cudaMalloc(&background_d, sizeof(BackgroundColor*)));
-    initializeBG<<<1,1>>>(background_d);
-    CHECK(cudaDeviceSynchronize());
-    std::cout << "Background ready" << std::endl;
+    Initializer::Background(&background_d);
 
     curandState *randState_d;
-    CHECK(cudaMalloc(&randState_d, width*height*sizeof(curandState)));
-    initializeRand<<<blocks, threads>>>(randState_d, width, height);
-    CHECK(cudaDeviceSynchronize());
-    std::cout << "Random states generated" << std::endl;
+    Initializer::RandomStates(&randState_d, cam.width, cam.height, blocks, threads);
 
 
     targetList** list; Target** targets; Shape** shapes; int N = 2000;
@@ -146,10 +138,7 @@ int main() {
     //addCompoundsToTargetlist<<<1,1>>>(compounds, 1, list, shapes);
     
     BVHTree** tree;
-    CHECK(cudaMalloc(&tree, sizeof(BVHTree*)));
-    CHECK(cudaDeviceSynchronize());
-    buildBVH<<<1,1>>>(list, tree);
-    CHECK(cudaDeviceSynchronize());
+    Initializer::BVHStructure(&tree, list);
     
     std::cout << "Targets generated" << std::endl;
 
@@ -301,11 +290,13 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaFree(background_d));
 
-    releaseTargets<<<1,1>>>(targets, list, shapes);
+    //releaseTargets<<<1,1>>>(targets, list, shapes);
+    releaseBVH<<<1,1>>>(targets, list, shapes, *tree);
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaFree(targets));
     CHECK(cudaFree(list));
     CHECK(cudaFree(shapes));
+    CHECK(cudaFree(tree));
 
 
 
