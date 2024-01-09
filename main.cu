@@ -61,9 +61,9 @@ int main() {
     int width = 1920, height = 1080;
     int depth = 4, samples = 100;
     int tx = 8, ty = 8;
-    bool backup = false;
+    bool backup = true;
     int partition = 0;
-    bool realTime = true;
+    bool realTime = false;
     bool fileRead = false;
 
     cam.setFOV(80.0f);
@@ -150,7 +150,7 @@ int main() {
     if(partition == 0) {
 
         completeRender<<<blocks, threads>>>(pixels, width, height, depth, samples, // TREE
-                                tree, background_d, cudaWindow, 
+                                list, background_d, cudaWindow, 
                                 randState_d);
         CHECK(cudaDeviceSynchronize());
 
