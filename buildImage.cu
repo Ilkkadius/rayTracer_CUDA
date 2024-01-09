@@ -25,7 +25,7 @@ __host__ bool isColumnorder(const std::string& stem) {
 
 int main() { 
 
-    // nvcc buildImage.cu -o buildImage -lsfml-graphics -lsfml-window -lsfml-system
+    // nvcc buildImage.cu -o buildImage -std=c++17 -lsfml-graphics -lsfml-window -lsfml-system
 
     /**
      * @brief Builds the image from a backup file 
