@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 #include "rayf.hpp"
 #include "backgroundsf.hpp"
 #include "scatteringf.hpp"

@@ -3,32 +3,32 @@
 
 #include <cuda_runtime.h>
 
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 #include "auxiliaryf.hpp"
 
 class Ray{
 public:
 
-    Vector3D rayDir, rayPos;
+    Vector3D dir, pos;
 
-    __host__ __device__ Ray() : rayDir(Vector3D(1,0,0)), rayPos(Vector3D(0,0,0)) {}
+    __host__ __device__ Ray() : dir(Vector3D(1,0,0)), pos(Vector3D(0,0,0)) {}
 
-    __host__ __device__ Ray(const Vector3D& direction, const Vector3D& point) : rayDir(unitVec(direction)), rayPos(point) {}
+    __host__ __device__ Ray(const Vector3D& direction, const Vector3D& point) : dir(unitVec(direction)), pos(point) {}
 
     __host__ __device__ Vector3D at(float t) const {
-        return rayPos + t*rayDir;
+        return pos + t*dir;
     }
 
     __host__ __device__ const Vector3D& location() const {
-        return rayPos;
+        return pos;
     }
 
     __host__ __device__ const Vector3D& heading() const {
-        return rayDir;
+        return dir;
     }
 
     __host__ __device__ const Vector3D& direction() const {
-        return rayDir;
+        return dir;
     }
 
 };
