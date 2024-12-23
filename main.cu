@@ -16,7 +16,8 @@
 #include "cameraf.hpp"
 #include "logMethods.hpp"
 #include "imageBackupf.hpp"
-#include "BVHf.hpp"
+//#include "BVHf.hpp"
+#include "fileOperations.hpp"
 
 #include "kernelSet.hpp"
 
@@ -62,7 +63,8 @@ int main() {
     int tx = 8, ty = 8;
     bool backup = false;
     int partition = 0;
-    bool realTime = false;
+    bool realTime = true;
+    bool fileRead = true;
 
     cam.setFOV(80.0f);
 
@@ -125,12 +127,17 @@ int main() {
     std::cout << "Random states generated" << std::endl;
 
 
-    targetList** list; Target** targets; Shape** shapes; int N = 95;
+    targetList** list; Target** targets; Shape** shapes; int N = 2000;
     CHECK(cudaMalloc(&list, sizeof(targetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
     initializeTargets<<<1,1>>>(targets, list, shapes, N);
     CHECK(cudaDeviceSynchronize());
+    if(fileRead) {
+        FileOperations::TargetsFromFile("teapot.obj", list, shapes);
+        CHECK(cudaDeviceSynchronize());
+    }
+    
     std::cout << "Targets generated" << std::endl;
 
     if(realTime) {
