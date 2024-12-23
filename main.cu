@@ -29,9 +29,9 @@ static inline int divup(int a, int b) {
     return (a + b - 1)/b;
 }
 
-static inline int roundup(int a, int b) {
-    return divup(a, b) * b;
-}
+//static inline int roundup(int a, int b) {
+//    return divup(a, b) * b;
+//}
 
 //###############################################################
 
@@ -119,10 +119,10 @@ int main() {
     // #################################
 
     int width = 1920, height = 1080;
-    int depth = 5, samples = 100;
+    int depth = 5, samples = 1000;
     int tx = 8, ty = 8;
 
-    WindowVectors window = initialRays(Vector3D(-2,0,0), Vector3D(1,0,0),
+    WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),
     1.0f, Vector3D(1,1,100), height, width, 0.8);
 
     // #################################
