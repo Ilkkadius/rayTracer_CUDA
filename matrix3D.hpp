@@ -7,7 +7,7 @@ class Matrix{
 public:
     Vector3D c1, c2, c3;
 
-    __device__ Matrix() : c1(Vector3D()), c2(Vector3D()), c3(Vector3D()) {}
+    __device__ Matrix() : c1(Vector3D(1,0,0)), c2(Vector3D(0,1,0)), c3(Vector3D(0,0,1)) {}
 
     __device__ Matrix(const Vector3D& A, const Vector3D& B, const Vector3D& C)
                 : c1(A), c2(B), c3(C) {}
@@ -24,27 +24,27 @@ public:
     /**
      * @brief Return first row of the matrix
      * 
-     * @return const Vector3D& 
+     * @return Vector3D
      */
-    __device__ const Vector3D& r1() const {
+    __device__ Vector3D r1() const {
         return Vector3D(c1.x, c2.x, c3.x);
     }
 
     /**
      * @brief Return second row of the matrix
      * 
-     * @return const Vector3D& 
+     * @return Vector3D
      */
-    __device__ const Vector3D& r2() const {
+    __device__ Vector3D r2() const {
         return Vector3D(c1.y, c2.y, c3.y);
     }
 
     /**
      * @brief Return third row of the matrix
      * 
-     * @return const Vector3D& 
+     * @return Vector3D
      */
-    __device__ const Vector3D& r3() const {
+    __device__ Vector3D r3() const {
         return Vector3D(c1.z, c2.z, c3.z);
     }
 
