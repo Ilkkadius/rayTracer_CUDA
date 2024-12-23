@@ -1,5 +1,5 @@
-#ifndef CUDA_CREATOR_METHODS_HPP
-#define CUDA_CREATOR_METHODS_HPP
+#ifndef CUDA_KERNEL_METHODS_HPP
+#define CUDA_KERNEL_METHODS_HPP
 
 #include <cuda_runtime.h>
 
@@ -12,8 +12,8 @@
  * @brief Methods for kernels (device only) to use
  * 
  */
-namespace Creator{
-    __device__ void targetScene(Target** targets, targetList** list, Shape** shapes, int capacity) {
+namespace KernelMethods{
+    __device__ void createScene(Target** targets, targetList** list, Shape** shapes, int capacity) {
         int N = capacity;
         switch(1) {
             case 1:
@@ -28,7 +28,7 @@ namespace Creator{
         }
     }
 
-    __device__ BackgroundColor* background(int i = 1) {
+    __device__ BackgroundColor* createBackground(int i = 1) {
         switch(i % 2) {
             case 1:
                 return new nightTime();
