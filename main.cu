@@ -132,10 +132,9 @@ int main() {
     Camera cam;
 
     int width = 1920, height = 1080;
-    int depth = 3, samples = 25000;
+    int depth = 3, samples = 25;
     int tx = 8, ty = 8;
-
-    std::cout << getDate() << std::endl;
+    bool backup = false;
 
     cam.setFOV(80.0f);
 
@@ -146,6 +145,14 @@ int main() {
     // #################################
     // # LOAD DATA TO DEVICE
     // #################################
+
+    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
+    std::cout << "\033[0;93m#        Ray tracer (GPU)       #\033[0m" << std::endl;
+    std::cout << "\033[0;93m# Date: " << getDate() << " #\033[0m" << std::endl;
+    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
+
+    std::cout << "Resolution: " << width << "x" << height << ", N = " << samples << ", recursion = " << depth << std::endl;
+    std::cout << "Backup to file: " << (backup ? "\033[1;32m" : "\033[1;31m") << std::boolalpha << backup << "\033[0m" << std::endl;
 
     cam.width = width; cam.height = height;
     cam.depth = depth; cam.samples = samples;
@@ -190,7 +197,7 @@ int main() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Starting GPU rendering..." << std::endl;
+    std::cout << "\033[0;32mGPU rendering starts\033[0m" << std::endl;
 
     render<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
@@ -207,7 +214,9 @@ int main() {
                                 randState_d, false);
     CHECK(cudaDeviceSynchronize());
 
-    Backup::imageToFile("backup.txt", pixels, width, height);
+    if(backup) {
+        Backup::imageToFile("backup.txt", pixels, width, height);
+    }
     
     std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
 
