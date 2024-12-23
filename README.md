@@ -10,13 +10,11 @@ This ray tracer uses *CUDA* in order to take advantage of GPU in parallel calcul
 
 At the moment changing the settings takes place manually in the **main.cu** file. Adjustable parameters include, e.g. resolution, samples per pixel and number of scatters per ray. Rendered images can be built immediately after the rendering to a *.png*-format, or they may be saved into a binary file. The **buildImage.cu** is then able to create the image from these binary files.
 
----
 
 ## Camera mode
 
 In addition to "static rendering", also interactive camera mode can be used. Controls are **WASD** and arrow keys for the horizontal movement, space and left shift for vertical movement. **Q** and **E** can be used to adjust the view angle (roll). Mouse cursor allows more free movement of view. Pressing **ESC** releases the cursor from the render window and **ENTER** ends the rendering completely. Pressing **V** outputs the current camera parameters to console and **F** toggles the fast movement mode.
 
----
 
 ## Other features
 
