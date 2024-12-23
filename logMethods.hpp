@@ -12,6 +12,9 @@ __host__ std::string zero2front(int a)
     return a >= 10 ? "" : "0";
 }
 
+/**
+ * @brief e.g. 1. Jan. 2023: 20:30:15
+ */
 __host__ std::string getDate() {
     int h, m, s, dd, yy;
     char d;
@@ -28,22 +31,55 @@ __host__ std::string getDate() {
     return date.str();
 }
 
+__host__ int getMonthNumber(const std::string& month) {
+    if(month[2] == 'n') {
+        return (month[1] == 'a' ? 1 : 6);
+    } else if(month[2] == 'b') {
+        return 2;
+    } else if(month[2] == 'r') {
+        return (month[0] == 'M' ? 3 : 4);
+    } else if(month[2] == 'y') {
+        return 5;
+    } else if(month[2] == 'l') {
+        return 7;
+    } else if(month[2] == 'g') {
+        return 8;
+    } else if(month[2] == 'p') {
+        return 9;
+    } else if(month[2] == 't') {
+        return 10;
+    } else if(month[2] == 'v') {
+        return 11;
+    } else {
+        return 12;
+    }
+}
+
+/**
+ * @brief e.g. 231231_2359
+ */
 __host__ std::string getRawDate() {
     int h, m, s, dd, yy;
     char d;
-    std::string mm;
+    std::string month;
     std::stringstream time(__TIME__);
     std::stringstream date(__DATE__);
 
     time >> h >> d >> m >> d >> s;
-    date >> mm >> dd >> yy;
+    date >> month >> dd >> yy;
+    int mm = getMonthNumber(month);
+
+    yy = yy % 100;
 
     std::stringstream rawDate;
-    rawDate << zero2front(dd) << dd << mm << yy - 2000 << "_" << zero2front(h) << h << zero2front(m) << m;
+    rawDate << zero2front(yy) << yy << zero2front(mm) << mm << zero2front(dd) << dd << "_" << zero2front(h) << h << zero2front(m) << m;
     return rawDate.str();
 }
 
-__host__ std::string getDuration(double duration, int precision = 2) {
+/**
+ * @brief e.g. 7min34s
+ */
+std::string getRawDuration(double duration, int precision = 2) {
     std::stringstream ss;
     int minutes = 0;
     if(duration > 60) {
@@ -54,9 +90,25 @@ __host__ std::string getDuration(double duration, int precision = 2) {
     return ss.str();
 }
 
+std::string getDuration(double duration) {
+    int minutes = 0;
+    std::stringstream runtime;
+    if (duration > 60.0)
+    {
+        minutes = duration / 60;
+        runtime << minutes << " minutes ";
+    }
+    runtime << duration - 60.0 * minutes << " seconds.";
+    return runtime.str();
+}
+
+std::string getImageDimensions(int width, int height) {
+    return std::to_string(width) + "x" + std::to_string(height);
+}
+
 __host__ std::string getImageFilename(int width, int height, int samples, double duration) {
     std::stringstream ss;
-    ss << width << "x" << height << "_" << samples << "samples_" << getDuration(duration, 0);
+    ss << width << "x" << height << "_" << samples << "samples_" << getRawDuration(duration, 0);
     return getRawDate() + "_GPU_" + ss.str() + "_figure.png";
 }
 
