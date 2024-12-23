@@ -70,7 +70,7 @@ int main() {
 
     Vector3D eye(0, 0, 0);
     Vector3D direction(1, 0, 0);
-    Vector3D up = cam.direction + Vector3D(0, 0, 100);
+    Vector3D up = direction + Vector3D(0, 0, 100);
 
     // #################################
     // # LOAD DATA TO DEVICE
@@ -208,26 +208,26 @@ int main() {
 
     } else if(partition == 2) {
 
-        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-        //                        list, background_d, cudaWindow, 
-        //                        randState_d, 0);
-        //CHECK(cudaDeviceSynchronize());
+        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, 0);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
+            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
         }
 
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
         std::cout << "25% rendered, time so far: " << getDuration(duration) << std::endl;
 
-        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-        //                        list, background_d, cudaWindow, 
-        //                        randState_d, 1);
-        //CHECK(cudaDeviceSynchronize());
+        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, 1);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
+            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
         }
 
         auto prevDuration = duration;
