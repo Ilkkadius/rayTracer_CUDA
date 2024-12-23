@@ -54,7 +54,7 @@ __device__ Matrix generateRotation(float a, char c) {
  * @param axis  vector defining the axis of rotation
  * @return Matrix 
  */
-__device__ Matrix generateRotation(float a, const Vector3D& axis) {
+__host__ __device__ Matrix generateRotation(float a, const Vector3D& axis) {
     Vector3D k = unitVec(axis);
     Matrix K(Vector3D(0, k.z, -k.y), Vector3D(-k.z, 0, k.x), Vector3D(k.y, -k.x, 0));
     return Matrix() + K * sin(a) + (1 - cos(a)) * K * K;

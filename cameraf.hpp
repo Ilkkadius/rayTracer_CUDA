@@ -83,6 +83,7 @@ public:
      * 
      */
     __host__ void check() {
+        initializeWindow();
         if(width < 0.0f) {
             throw std::invalid_argument("Width must be positive");
         } else if(height < 0.0f) {
