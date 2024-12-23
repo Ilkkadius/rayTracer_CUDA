@@ -31,8 +31,8 @@ __device__ void createTargets(Target** targets, targetList** list, Shape** shape
     //targets[2] = new Target(shapes[2]);
     *list = new targetList(targets, 2, N);
 
-    Octahedron ico(Vector3D(10,-2,2), 0.8f);
-    ico.rotate(0.0f, Vector3D(0,0,1));
+    Cube ico(Vector3D(10,-2,2), 0.8f);
+    ico.rotate(1.5f, Vector3D(0,0,1));
     ico.copyToList(*list, shapes);
 
     //compoundTest test;
