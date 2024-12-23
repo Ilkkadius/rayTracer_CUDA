@@ -3,7 +3,7 @@
 
 #include <cuda_runtime.h>
 
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 #include "rayf.hpp"
 #include "auxiliaryf.hpp"
 
@@ -27,15 +27,15 @@ public:
     }
 
     __device__ float rayCollision(const Ray& ray) const {
-        Vector3D v = ray.rayPos - center;
-        float vd = Dot(v, ray.rayDir);
+        Vector3D v = ray.pos - center;
+        float vd = Dot(v, ray.dir);
         float disc = vd * vd - (v.lengthSquared() - radius * radius);
         if(disc < 0.0f) {
             return -1.0f;
         }
         float root = sqrtf(disc);
         float res = -vd - root;
-        if(res <= 0.0f) {
+        if(res < 0.0f) {
             res = -vd + root;
             if(res < 0.0f) {
                 return -1.0f;

@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-#include "linearAlgebraf.hpp"
+#include "vector3D.hpp"
 
 static constexpr float epsilon = 0.00001f;
 
