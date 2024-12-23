@@ -98,6 +98,11 @@ public:
 
 }; //##############################################
 
+__host__ std::ostream& operator<<(std::ostream& os, const Vector3D& vec) {
+    os << "(" << vec.x << "; " << vec.y << "; " << vec.z << ")";
+    return os;
+}
+
 /**
  * @brief Calculates the dot product between two given vectors
  * 

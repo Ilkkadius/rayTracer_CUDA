@@ -1,14 +1,12 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <iostream>
+#include <cstdlib>
 
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
-#include <cudaProfiler.h>
-#include <cuda_profiler_api.h>
 
 #include "initializers.hpp"
-#include "vector3D.hpp"
 #include "tracerf.hpp"
 #include "rayf.hpp"
 #include "backgroundsf.hpp"
@@ -20,7 +18,12 @@
 #include "imageBackupf.hpp"
 #include "BVHf.hpp"
 
+#include "kernelSet.hpp"
+
+#include "realtimeRenderf.hpp"
+
 // PPC
+#ifndef CHECK_FUNC
 static inline void check(cudaError_t err, const char* context) {
     if (err != cudaSuccess) {
         std::cerr << "CUDA error: " << context << ": "
@@ -30,164 +33,18 @@ static inline void check(cudaError_t err, const char* context) {
 }
 
 #define CHECK(x) check(x, #x)
+#endif
 
-static inline int divup(int a, int b) {
-    return (a + b - 1)/b;
-}
+#ifndef divup_FUNC
+    static inline int divup(int a, int b) {
+        return (a + b - 1)/b;
+    }
+#endif
 
 //static inline int roundup(int a, int b) {
 //    return divup(a, b) * b;
 //}
 
-//###############################################################
-
-__global__ void render(sf::Uint8 *pixels, 
-        int width, int height, 
-        int depth, int samples,
-        targetList** list,
-        BackgroundColor** background, 
-        WindowVectors* window, 
-        curandState* randState) {
-            
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
-    if(i >= width || j >= height) return;
-
-    int idx = width * j + i;
-    curandState rand = randState[idx];
-
-    Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
-    
-    pixels[4*idx] = color.x;
-    pixels[4*idx + 1] = color.y;
-    pixels[4*idx + 2] = color.z;
-    pixels[4*idx + 3] = 255;
-}
-
-__global__ void renderHalf(sf::Uint8 *pixels, 
-        int width, int height, 
-        int depth, int samples,
-        targetList** list,
-        BackgroundColor** background, 
-        WindowVectors* window, 
-        curandState* randState, bool left) {
-            
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
-    if(i >= width || j >= height) return;
-    if(left) {
-        if(i >= width/2) return;
-    } else {
-        if(i < width/2) return;
-    }
-
-    int idx = width * j + i;
-    curandState rand = randState[idx];
-
-    Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
-    
-    pixels[4*idx] = color.x;
-    pixels[4*idx + 1] = color.y;
-    pixels[4*idx + 2] = color.z;
-    pixels[4*idx + 3] = 255;
-}
-
-__global__ void renderQuarter(sf::Uint8 *pixels, 
-        int width, int height, 
-        int depth, int samples,
-        targetList** list,
-        BackgroundColor** background, 
-        WindowVectors* window, 
-        curandState* randState, int quarter) {
-            
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
-    if(i >= width || j >= height) return;
-    quarter = quarter % 4;
-    switch(quarter) {
-        case 0:
-            if(i >= width/4) return;
-            break;
-        case 1:
-            if(i < width/4 || i >= width/2) return;
-            break;
-        case 2:
-            if(i < width/2 || i >= 3*width/4) return;
-            break;
-        case 3:
-            if(i < 3*width/4) return;
-            break;
-    }
-
-    int idx = width * j + i;
-    curandState rand = randState[idx];
-
-    Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
-    
-    pixels[4*idx] = color.x;
-    pixels[4*idx + 1] = color.y;
-    pixels[4*idx + 2] = color.z;
-    pixels[4*idx + 3] = 255;
-}
-
-
-
-__global__ void initializeBG(BackgroundColor** background) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        *background = createNightTime();
-    }
-}
-
-__global__ void initializeTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        createTargets(targets, list, shapes, capacity);
-    }
-}
-
-__global__ void initializeBVH(targetList** listptr, Target** targets, Shape** shapes, BVHTree* tree, int capacity) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        createTargets(targets, listptr, shapes, capacity);
-        *tree = BVHTree(listptr);
-    }
-}
-
-__global__ void initializeRand(curandState* randState, int width, int height) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
-    if(i >= width || j >= height) return;
-    int idx = i + width * j;
-    curand_init(1889, idx, 0, &randState[idx]);
-}
-
-
-__global__ void releaseBG(BackgroundColor** background) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        delete *background;
-    }
-}
-
-__global__ void releaseTargets(Target** targets, targetList** list, Shape** shapes) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        targetList l = **list;
-        for(int i = 0; i < l.size; i++) {
-            delete *(targets + i);
-            delete *(shapes + i);
-        }
-        delete *list;
-    }
-}
-
-__global__ void releaseBVH(Target** targets, targetList** list, Shape** shapes, BVHTree* tree) {
-    if(threadIdx.x == 0 && blockIdx.x == 0) {
-        targetList l = **list;
-        for(int i = 0; i < l.size; i++) {
-            delete *(targets + i);
-            delete *(shapes + i);
-        }
-        delete *list;
-        tree->clear();
-    }
-}
 
 // ################################################################
 
@@ -201,16 +58,17 @@ int main() {
     Camera cam;
 
     int width = 1920, height = 1080;
-    int depth = 3, samples = 500;
+    int depth = 4, samples = 100;
     int tx = 8, ty = 8;
-    bool backup = true;
-    int partition = 2;
+    bool backup = false;
+    int partition = 0;
+    bool realTime = false;
 
     cam.setFOV(80.0f);
 
-    cam.eye = Vector3D(0, 0, 0);
-    cam.direction = Vector3D(1, 0, 0);
-    cam.up = cam.direction + Vector3D(0, 0, 100);
+    Vector3D eye(0, 0, 0);
+    Vector3D direction(1, 0, 0);
+    Vector3D up = cam.direction + Vector3D(0, 0, 100);
 
     // #################################
     // # LOAD DATA TO DEVICE
@@ -230,21 +88,28 @@ int main() {
     cam.check();
     cam.initializeWindow();
 
-    std::string backupBinPath(getRawDate() + "_" + getImageDimensions(width, height) + "_GPU_backup.bin");
+    if(partition < 0 || partition > 3) {
+        std::cout << "ERROR: Invalid partition value" << std::endl;
+        return 1;
+    }
+
+    std::string backupBinPath(getRawDate() + "_" + getImageDimensions(width, height) 
+                            + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.bin");
     std::string backupTextPath = "" + getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
-                            + (samples > 0 ? "_" + std::to_string(samples) + "samples" : "") + "_GPU_backup.txt";
+                            + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.txt";
 
     WindowVectors *cudaWindow = NULL;
     CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
     CHECK(cudaMemcpy(cudaWindow, &cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
     std::cout << "Window ready" << std::endl;
 
+
     dim3 blocks(divup(width, tx), divup(height, ty));
     dim3 threads(tx, ty);
 
-    sf::Uint8 *pixels;// = new sf::Uint8[width*height*4];
-    CHECK(cudaMallocManaged(&pixels, width*height*4));
 
+    sf::Uint8 *pixels;
+    CHECK(cudaMallocManaged(&pixels, width*height*4));
 
 
     BackgroundColor** background_d;
@@ -268,7 +133,16 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     std::cout << "Targets generated" << std::endl;
 
+    if(realTime) {
+        realtimeRender::startCamera(cam, list, background_d, randState_d, eye, direction, up);
+        return 0;
+    }
 
+    cam.eye = eye;
+    cam.direction = direction;
+    cam.up = up;
+
+    // ####################################################################
 
     std::cout << "\033[0;32mGPU rendering started\033[0m" << std::endl;
 
@@ -278,9 +152,10 @@ int main() {
 
     if(partition == 0) {
 
-        render<<<blocks, threads>>>(pixels, width, height, depth, samples,
+        completeRender<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
                                 randState_d);
+        CHECK(cudaDeviceSynchronize());
 
         if(backup) {
             Backup::fullImageToBinary(pixels, width, height);
@@ -314,31 +189,32 @@ int main() {
 
     } else if(partition == 2) {
 
-        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-                                list, background_d, cudaWindow, 
-                                randState_d, 0);
-        CHECK(cudaDeviceSynchronize());
+        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+        //                        list, background_d, cudaWindow, 
+        //                        randState_d, 0);
+        //CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
+            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 0);
         }
 
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
         std::cout << "25% rendered, time so far: " << getDuration(duration) << std::endl;
 
-        renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
-                                list, background_d, cudaWindow, 
-                                randState_d, 1);
-        CHECK(cudaDeviceSynchronize());
+        //renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
+        //                        list, background_d, cudaWindow, 
+        //                        randState_d, 1);
+        //CHECK(cudaDeviceSynchronize());
 
         if(backup) {
-            Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
+            //Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 1);
         }
 
+        auto prevDuration = duration;
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-        std::cout << "50% rendered, time so far: " << getDuration(duration) << std::endl;
+        std::cout << "50% rendered, time so far: " << getDuration(duration) << " (\u0394t = " << getRawDuration(duration - prevDuration) << ")" << std::endl;
 
         renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
@@ -349,9 +225,10 @@ int main() {
             Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 2);
         }
 
+        prevDuration = duration;
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-        std::cout << "75% rendered, time so far: " << getDuration(duration) << std::endl;
+        std::cout << "75% rendered, time so far: " << getDuration(duration) << " (\u0394t = " << getRawDuration(duration - prevDuration) << ")" << std::endl;
 
         renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
@@ -362,10 +239,40 @@ int main() {
             Backup::quarterImageToBinary(backupBinPath, pixels, width, height, 3);
         }
 
+    } else if(partition == 3) {
+        int parts = 100;
+        int partSamples = samples/parts;
+        //bool showWindow = true;
+
+        std::string cumulativeBackupPathStem(getRawDate() + "_" + getImageDimensions(width, height) 
+                            + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup");
+
+        for(int i = 0; i < parts; i++) {
+            cumulativeRender<<<blocks, threads>>>(pixels, width, height, depth, partSamples,
+                                list, background_d, cudaWindow, 
+                                randState_d, i);
+            CHECK(cudaDeviceSynchronize());
+
+            initializeRand<<<blocks, threads>>>(randState_d, width, height, rand());
+            CHECK(cudaDeviceSynchronize()); // Random numbers have to be regenerated as the rendering kernel runs through the same pixels
+
+            if(backup) {
+                for(int j = 0; j < width; j++) {
+                    Backup::imageToBinary(cumulativeBackupPathStem + "_p" + std::to_string(i+1) + ".bin", pixels, j, width, height);
+                }
+            }
+
+            end = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+
+            std::cout << "Part " << i+1 << "/" << parts << " done. Time so far: " << getDuration(duration) << std::endl;
+        }
     }
 
     //Backup::fullImageToText(backupTextPath, pixels, width, height);
-    //Backup::fullImageToBinary(pixels, width, height);
+    if(backup)
+        Backup::fullImageToBinary(pixels, width, height);
+    
     
     std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
 
@@ -407,6 +314,7 @@ int main() {
     CHECK(cudaFree(targets));
     CHECK(cudaFree(list));
     CHECK(cudaFree(shapes));
+
 
 
     

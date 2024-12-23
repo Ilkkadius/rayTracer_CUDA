@@ -38,6 +38,8 @@ public:
     __host__ __device__ WindowVectors(Vector3D starter, Vector3D eye, Vector3D xVec, Vector3D yVec)
     : starter_(starter), eye_(eye), xVec_(xVec), yVec_(yVec) {}
 
+    __host__ __device__ WindowVectors(const WindowVectors& window) : starter_(window.starter_), eye_(window.eye_), xVec_(window.xVec_), yVec_(window.yVec_) {}
+
     Vector3D starter_, eye_, xVec_, yVec_;
 };
 

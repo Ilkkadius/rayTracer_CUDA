@@ -334,6 +334,71 @@ namespace Backup{
         }
     }
 
+    void appendOrderedBinaries(const std::string& first, const std::string& second) {
+
+        std::ifstream firstBis(first, std::ifstream::binary);
+        if(!firstBis.is_open()) {
+            std::cout << "Could not open first binary!" << std::endl;
+            return;
+        }
+        int width = 1920, height = 1080;
+        sf::Uint8* pixels = new sf::Uint8[width*height*4];
+
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                uint8_t rgb[4];
+                firstBis.read((char*) rgb, 4);
+                int idx = 4*(x + y*width);
+                if(x < width/2) {
+                    pixels[idx] = rgb[0];
+                    pixels[idx + 1] = rgb[1];
+                    pixels[idx + 2] = rgb[2];
+                    pixels[idx + 3] = rgb[3];
+                }
+            }
+        }
+        firstBis.close();
+
+        std::ifstream secondBis(second, std::ifstream::binary);
+        if(!secondBis.is_open()) {
+            std::cout << "Could not open second binary!" << std::endl;
+            return;
+        }
+
+        for(int x = width/2; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                uint8_t rgb[4];
+                secondBis.read((char*) rgb, 4);
+                int idx = 4*(x + y*width);
+                pixels[idx] = rgb[0];
+                pixels[idx + 1] = rgb[1];
+                pixels[idx + 2] = rgb[2];
+                pixels[idx + 3] = rgb[3];
+            }
+        }
+        secondBis.close();
+
+
+        std::string path(getRawDate() + "_" + getImageDimensions(width, height) + "_ORDERED_appended_GPU.bin");
+
+        std::ofstream file(path, std::ofstream::binary | std::ofstream::app);
+        if(!file.is_open()) {
+            std::cout << "Could not open appending binary!" << std::endl;
+            return;
+        }
+
+        for(int x = 0; x < width; x++) {
+            int idx = 4*x;
+            for(int y = 0; y < height; y++) {
+                uint8_t rgb[4] = {pixels[idx], pixels[idx + 1], pixels[idx + 2], 255};
+                file.write((const char*) rgb, 4);
+                idx += 4*width;
+            }
+        }
+
+        delete[] pixels;
+    }
+
 }
 
 #endif
