@@ -106,6 +106,32 @@ private:
 
 };
 
+class Tetrahedron : public Compound{
+public:
+    
+    __device__ Tetrahedron(const Vector3D& center, float radius)
+                : Compound(4) {
+                    makeTetrahedron(center, radius);
+                }
+
+private:
+    __device__ void makeTetrahedron(const Vector3D& center, float radius) {
+        float R = radius, s = 0.70711f; // = 1/sqrt(2)
+
+        Vector3D vertices[4] = {
+            Vector3D(1, 0, -s), Vector3D(-1,0,-s), Vector3D(0,1,s), Vector3D(0,-1,s)
+        };
+
+        int faces[4][3] = { {0,1,2}, {0,2,3}, {0,1,3}, {1,2,3} };
+
+        for(int i = 0; i < 4; i++) {
+            int v1 = faces[i][0], v2 = faces[i][1], v3 = faces[i][2];
+            Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
+            add(new Target(T));
+        }
+    }
+};
+
 class Icosahedron : public Compound{
 public:
     __device__ Icosahedron(const Vector3D& center, float radius)
