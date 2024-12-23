@@ -36,7 +36,11 @@ __device__ Vector3D Trace(Ray& ray, targetList** listptr, BackgroundColor* backg
         if(info.t > epsilon) {
             color = 0.7f * color;
             Vector3D p = info.point, n = info.normal;
-            current = Ray(p + n + aux::randHemisphereVec(&randState, n), p);
+            Vector3D dir = n + aux::randHemisphereVec(&randState, n);
+            while(dir.lengthSquared() < 0.001f) {
+                dir = n + aux::randHemisphereVec(&randState, n);
+            }
+            current = Ray(dir, p);
         } else {
             return color * background->colorize(current);
         }
