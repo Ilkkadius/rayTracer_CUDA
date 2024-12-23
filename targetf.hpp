@@ -40,6 +40,14 @@ float emissivity;
         return emissivity*color;
     }
 
+    __device__ Vector3D minBox() const {
+        return shape->minBox;
+    }
+
+    __device__ Vector3D maxBox() const {
+        return shape->maxBox;
+    }
+
 
 };
 
