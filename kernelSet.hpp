@@ -25,36 +25,102 @@
 
         Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
         
-        pixels[4*idx] = color.x;
-        pixels[4*idx + 1] = color.y;
-        pixels[4*idx + 2] = color.z;
-        pixels[4*idx + 3] = 255;
+        idx = idx << 2;
+        
+        pixels[idx] = color.x;
+        pixels[idx + 1] = color.y;
+        pixels[idx + 2] = color.z;
+        pixels[idx + 3] = 255;
     }
 
-    __global__ void cumulativeRender(sf::Uint8 *pixels, 
+    __global__ void completeRender(sf::Uint8 *pixels, 
         int width, int height, 
         int depth, int samples,
-        targetList** list,
+        BVHTree** tree,
         BackgroundColor** background, 
         WindowVectors* window, 
-        curandState* randState,
-        int currentIteration) {
-
+        curandState* randState) {
+            
         int i = blockIdx.x * blockDim.x + threadIdx.x;
         int j = blockIdx.y * blockDim.y + threadIdx.y;
         if(i >= width || j >= height) return;
 
         int idx = width * j + i;
-        int k = currentIteration;
         curandState rand = randState[idx];
 
-        Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
-        
-        pixels[4*idx] = (color.x + k*pixels[4*idx])/(k + 1.0f);
-        pixels[4*idx + 1] = (color.y + k*pixels[4*idx + 1])/(k + 1.0f);
-        pixels[4*idx + 2] = (color.z + k*pixels[4*idx + 2])/(k + 1.0f);
-        pixels[4*idx + 3] = 255;
+        Vector3D color = 255 * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
 
+        idx = idx << 2;
+        
+        pixels[idx] = color.x;
+        pixels[idx + 1] = color.y;
+        pixels[idx + 2] = color.z;
+        pixels[idx + 3] = 255;
+    }
+
+    __global__ void RealTimeRender(sf::Uint8 *pixels, 
+        int width, int height, 
+        int depth, int samples,
+        BVHTree** tree,
+        BackgroundColor** background, 
+        WindowVectors* window, 
+        curandState* randState, double* darray) {
+            
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        int j = blockIdx.y * blockDim.y + threadIdx.y;
+        if(i >= width || j >= height) return;
+
+        int idx = width * j + i;
+        curandState rand = randState[idx];
+
+        Vector3D color = 255 * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
+
+        int pidx = idx << 2;
+        
+        pixels[pidx] = color.x;
+        pixels[pidx + 1] = color.y;
+        pixels[pidx + 2] = color.z;
+        pixels[pidx + 3] = 255;
+
+        idx += idx << 1;
+
+        darray[idx] = color.x;
+        darray[idx + 1] = color.y;
+        darray[idx + 2] = color.z;
+    }
+
+    __global__ void RealTimeUpdateRender(sf::Uint8 *pixels, 
+        int width, int height, 
+        int depth, int samples,
+        BVHTree** tree,
+        BackgroundColor** background, 
+        WindowVectors* window, 
+        curandState* randState, double* darray, float frameIdx) {
+            
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        int j = blockIdx.y * blockDim.y + threadIdx.y;
+        if(i >= width || j >= height) return;
+
+        int idx = width * j + i;
+        curandState rand = randState[idx];
+
+        Vector3D color = 255 * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
+
+        int didx = 3*idx;
+
+        darray[didx] += color.x;
+        darray[didx + 1] += color.y;
+        darray[didx + 2] += color.z;
+
+        int pidx = didx + idx;
+        float rd = 1/(1.0f + frameIdx);
+        
+        pixels[pidx] = darray[didx] * rd;
+        pixels[pidx + 1] = darray[didx + 1] * rd;
+        pixels[pidx + 2] = darray[didx + 1] * rd;
+        pixels[pidx + 3] = 255;
+
+        
     }
 
 
@@ -80,10 +146,12 @@
 
         Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
         
-        pixels[4*idx] = color.x;
-        pixels[4*idx + 1] = color.y;
-        pixels[4*idx + 2] = color.z;
-        pixels[4*idx + 3] = 255;
+        idx = idx << 2;
+        
+        pixels[idx] = color.x;
+        pixels[idx + 1] = color.y;
+        pixels[idx + 2] = color.z;
+        pixels[idx + 3] = 255;
     }
 
 
@@ -119,10 +187,12 @@
 
         Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
         
-        pixels[4*idx] = color.x;
-        pixels[4*idx + 1] = color.y;
-        pixels[4*idx + 2] = color.z;
-        pixels[4*idx + 3] = 255;
+        idx = idx << 2;
+        
+        pixels[idx] = color.x;
+        pixels[idx + 1] = color.y;
+        pixels[idx + 2] = color.z;
+        pixels[idx + 3] = 255;
     }
 
     // ###############################################
@@ -168,10 +238,9 @@
         }
     }
 
-    __global__ void initializeBVH(targetList** listptr, Target** targets, Shape** shapes, BVHTree* tree, int capacity) {
+    __global__ void buildBVH(targetList** listptr, BVHTree** tree) {
         if(threadIdx.x == 0 && blockIdx.x == 0) {
-            createTargets(targets, listptr, shapes, capacity);
-            *tree = BVHTree(listptr);
+            *tree = new BVHTree(listptr);
         }
     }
 
