@@ -38,12 +38,13 @@
 
 *.vscode
 */figures*
+*/backups*
 *figures
 */logbook.txt
 *logbook.txt
 
 main
-
+*.bin
 *.png
 
 # Kernel Module Compile Results
