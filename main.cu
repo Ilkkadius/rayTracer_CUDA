@@ -119,7 +119,6 @@ __global__ void releaseTargets(Target** targets, targetList** list, Shape** shap
 // nvcc main.cu -o main -lsfml-graphics -lsfml-window -lsfml-system
 
 int main() {
-    auto start = std::chrono::high_resolution_clock::now();
     // #################################
     // # SET PROGRAM RUN PARAMETERS
     // #################################
@@ -129,6 +128,8 @@ int main() {
     int width = 1920, height = 1080;
     int depth = 3, samples = 50;
     int tx = 8, ty = 8;
+
+    std::cout << getDate() << " ::: " << getRawDate() << std::endl;
 
     cam.setFOV(80.0f);
 
@@ -180,6 +181,9 @@ int main() {
     std::cout << "Targets generated" << std::endl;
 
 
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     std::cout << "Starting GPU rendering..." << std::endl;
 
     render<<<blocks, threads>>>(pixels, width, height, depth, samples,
@@ -188,6 +192,10 @@ int main() {
     CHECK(cudaDeviceSynchronize());
     
     std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+    std::cout << "Rendertime: " << getDuration(duration, 3) << std::endl;
 
     //######################################
     // # GENERATE IMAGE, FREE MEMORY
@@ -198,8 +206,17 @@ int main() {
     texture.update(pixels);
 
     sf::Image image = texture.copyToImage();
-    image.saveToFile("testikuvaGPU.png");
 
+    std::string filename = getImageFilename(width, height, samples, duration);
+    if(!image.saveToFile("figures/" + filename)) {
+        if(!image.saveToFile(filename)) {
+            std::cout << "\033[31mImage was not saved...\033[0m" << std::endl;
+        } else {
+            std::cout << "\033[32;1mImage saved!\033[0m" << std::endl;
+        }
+    } else {
+        std::cout << "\033[32;1mImage saved!\033[0m" << std::endl;
+    }
 
     CHECK(cudaFree(cudaWindow));
     CHECK(cudaFree(pixels));
@@ -216,9 +233,7 @@ int main() {
     CHECK(cudaFree(shapes));
 
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    std::cout << "Total program runtime: " << duration << " seconds" << std::endl;
+    
 
     cudaDeviceReset();
 
