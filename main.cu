@@ -150,7 +150,7 @@ int main() {
     if(partition == 0) {
 
         completeRender<<<blocks, threads>>>(pixels, width, height, depth, samples, // TREE
-                                list, background_d, cudaWindow, 
+                                tree, background_d, cudaWindow, 
                                 randState_d);
         CHECK(cudaDeviceSynchronize());
 
