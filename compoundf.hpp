@@ -114,7 +114,7 @@ public:
 private:
     __device__ void generator() {
         Sphere* S = new Sphere(Vector3D(6, -0.5, 2), 0.5f);
-        Target* T = new Target(S);
+        Target* T = new Target(S, Vector3D(1,0.2,0.2));
         add(T);
     }
 
@@ -125,13 +125,13 @@ private:
 class Tetrahedron : public Compound{
 public:
     
-    __device__ Tetrahedron(const Vector3D& center, float radius)
+    __device__ Tetrahedron(const Vector3D& center, float radius, const Vector3D& color)
                 : Compound(4) {
-                    makeTetrahedron(center, radius);
+                    makeTetrahedron(center, radius, color);
                 }
 
 private:
-    __device__ void makeTetrahedron(const Vector3D& center, float radius) {
+    __device__ void makeTetrahedron(const Vector3D& center, float radius, const Vector3D& color) {
         float R = radius, s = 0.70711f; // = 1/sqrt(2)
 
         Vector3D vertices[4] = {
@@ -143,20 +143,20 @@ private:
         for(int i = 0; i < 4; i++) {
             int v1 = faces[i][0], v2 = faces[i][1], v3 = faces[i][2];
             Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
-            add(new Target(T));
+            add(new Target(T, color));
         }
     }
 };
 
 class Icosahedron : public Compound{
 public:
-    __device__ Icosahedron(const Vector3D& center, float radius)
+    __device__ Icosahedron(const Vector3D& center, float radius, const Vector3D& color)
                 : Compound(20) {
-                    makeIcosahedron(center, radius);
+                    makeIcosahedron(center, radius, color);
                 }
 
 private:
-    __device__ void makeIcosahedron(const Vector3D& center, float radius) {
+    __device__ void makeIcosahedron(const Vector3D& center, float radius, const Vector3D& color) {
         float R = radius;
 
         float permutations[4][2] = {{1.0f, phi}, {-1.0f, phi}, {1.0f, -phi}, {-1.0f, -phi}};
@@ -182,32 +182,32 @@ private:
         for(int i = 0; i < 20; i++) {
             int v1 = facePermutations[i][0], v2 = facePermutations[i][1], v3 = facePermutations[i][2];
             Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
-            add(new Target(T));
+            add(new Target(T, color));
         }
     }
 };
 
 class Pentagon : public Compound{
 public:
-    __device__ Pentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5)
-            : Compound(3) {makePentagon(v1, v2, v3, v4, v5);}
+    __device__ Pentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5, const Vector3D& color)
+            : Compound(3) {makePentagon(v1, v2, v3, v4, v5, color);}
 
 private:
-    __device__ void makePentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5) {
+    __device__ void makePentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5, const Vector3D& color) {
         Triangle* T1 = new Triangle(v1, v2, v3);
         Triangle* T2 = new Triangle(v1, v3, v4);
         Triangle* T3 = new Triangle(v1, v4, v5);
-        add(new Target(T1)); add(new Target(T2)); add(new Target(T3));
+        add(new Target(T1, color)); add(new Target(T2, color)); add(new Target(T3, color));
     }
 };
 
 class Dodecahedron : public Compound{
 public:
-    __device__ Dodecahedron(const Vector3D& center, float radius)
-                : Compound(36) {makeDodecahedron(center, radius);}
+    __device__ Dodecahedron(const Vector3D& center, float radius, const Vector3D& color)
+                : Compound(36) {makeDodecahedron(center, radius, color);}
 
 private:
-    __device__ void makeDodecahedron(const Vector3D& center, float radius) {
+    __device__ void makeDodecahedron(const Vector3D& center, float radius, const Vector3D& color) {
         float R = radius;
 
         float permutations[4][2] = {{1.0f, 1.0f}, {-1.0f, 1.0f}, {1.0f, -1.0f}, {-1.0f, -1.0f}};
@@ -235,7 +235,7 @@ private:
             int vv0 = faces[i][0], vv1 = faces[i][1], vv2 = faces[i][2], vv3 = faces[i][3], vv4 = faces[i][4];
             Vector3D v1(R*vertices[vv0] + center), v2(R*vertices[vv1] + center), 
                     v3(R*vertices[vv2] + center), v4(R*vertices[vv3] + center), v5(R*vertices[vv4] + center);
-            Pentagon p(v1, v2, v3, v4, v5);
+            Pentagon p(v1, v2, v3, v4, v5, color);
             mergeCompound(p);
         }
     }
@@ -243,11 +243,11 @@ private:
 
 class Octahedron : public Compound{
 public:
-    __device__ Octahedron(const Vector3D& center, float radius)
-                : Compound(8) {makeOctahedron(center, radius);}
+    __device__ Octahedron(const Vector3D& center, float radius, const Vector3D& color)
+                : Compound(8) {makeOctahedron(center, radius, color);}
 
 private:
-    __device__ void makeOctahedron(const Vector3D& center, float radius) {
+    __device__ void makeOctahedron(const Vector3D& center, float radius, const Vector3D& color) {
         float R = radius;
 
         Vector3D vertices[6] = {
@@ -261,7 +261,7 @@ private:
         for(int i = 0; i < 8; i++) {
             int v1 = faces[i][0], v2 = faces[i][1], v3 = faces[i][2];
             Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
-            add(new Target(T));
+            add(new Target(T, color));
         }
     }
 
@@ -269,11 +269,11 @@ private:
 
 class Cube : public Compound{
 public:
-    __device__ Cube(const Vector3D& center, float radius)
-        : Compound(12) {buildCube(center, radius);}
+    __device__ Cube(const Vector3D& center, float radius, const Vector3D& color)
+        : Compound(12) {buildCube(center, radius, color);}
 
 private:
-    __device__ void buildCube(const Vector3D& center, float radius) {
+    __device__ void buildCube(const Vector3D& center, float radius, const Vector3D& color) {
         float R = radius, d = 0.577350269f;
 
         Vector3D v[8] = { // Vertices
@@ -289,7 +289,7 @@ private:
             Vector3D q0 = R*v[f[i][0]] + center, q1 = R*v[f[i][1]] + center, q2 = R*v[f[i][2]] + center, q3 = R*v[f[i][3]] + center;
             Triangle* T1 = new Triangle(q0, q1, q2);
             Triangle* T2 = new Triangle(q2, q3, q0);
-            add(new Target(T1)); add(new Target(T2));
+            add(new Target(T1, color)); add(new Target(T2, color));
         }
     }
 };

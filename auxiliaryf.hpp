@@ -9,6 +9,7 @@
 static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will occur
 static constexpr float phi = 1.61803f;
 
+
 namespace aux{
 
     /**
