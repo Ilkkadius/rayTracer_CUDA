@@ -129,9 +129,36 @@
     // # INITIALIZATION & MEMORY RELEASE
     // ###############################################
 
+    /**
+     * @brief Auxiliary kernel for copying file contents to the rendered used in fileOperations.hpp
+     * 
+     * @param list 
+     * @param shapes 
+     * @param vertices 
+     * @param fVertices 
+     * @param fColors 
+     * @param defaultColor
+     */
+    __global__ void generateTargets(targetList** list, Shape** shapes, Vector3D* vertices, int* fVertices, Vector3D* fColors, size_t fCount, Vector3D* defaultColor) {
+        if(threadIdx.x == 0 && blockIdx.x == 0) {
+            Vector3D color, v1, v2, v3;
+            Compound fileCompound(fCount);
+            for(size_t i = 0; i < fCount; i++) {
+                int idx = 3*i;
+                int v[3] = {fVertices[idx], fVertices[idx + 1], fVertices[idx + 2]};
+                color = (fColors[i].x >= 0 && fColors[i].y >= 0 && fColors[i].z >= 0) ? fColors[i] : *defaultColor; // Fix this!
+
+                v1 = vertices[v[0]], v2 = vertices[v[1]], v3 = vertices[v[2]];
+                Triangle* T = new Triangle(v1, v2, v3);
+                fileCompound.add(new Target(T, color));
+            }
+            fileCompound.copyToList(*list, shapes);
+        }
+    }
+
     __global__ void initializeBG(BackgroundColor** background) {
         if(threadIdx.x == 0 && blockIdx.x == 0) {
-            *background = createNightTime();
+            *background = createBackground();
         }
     }
 

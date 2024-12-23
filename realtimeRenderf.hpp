@@ -16,22 +16,6 @@
 #include "cameraf.hpp"
 #include "kernelSet.hpp"
 
-#define CHECK_FUNC
-static inline void check(cudaError_t err, const char* context) {
-    if (err != cudaSuccess) {
-        std::cerr << "CUDA error: " << context << ": "
-            << cudaGetErrorString(err) << std::endl;
-        std::exit(EXIT_FAILURE);
-    }
-}
-#define CHECK(x) check(x, #x)
-
-#define divup_FUNC
-
-static inline int divup(int a, int b) {
-    return (a + b - 1)/b;
-}
-
 namespace cameraMove{
 
     void left(Vector3D& eye, Vector3D& direction, Vector3D& up, double speed = 1.0) {
@@ -172,7 +156,7 @@ namespace realtimeRender{
         cam.check();
 
         Camera camCpy = cam;
-        camCpy.samples = 5;
+        camCpy.samples = 2;
         camCpy.width = camCpy.width/2;
         camCpy.height = camCpy.height/2;
         camCpy.depth = 3;
