@@ -11,11 +11,11 @@
 #include "targetf.hpp"
 #include "auxiliaryf.hpp"
 
-__device__ HitInfo closestHit(Ray& ray, targetList** listptr) {
+__device__ HitInfo closestHit(const Ray& ray, targetList** listptr) {
     HitInfo info;
-    targetList tlist = **listptr;
-    for(int i = 0; i < tlist.size; i++) {
-        Target target = tlist[i];
+    targetList list = **listptr;
+    for(int i = 0; i < list.size; i++) {
+        Target target = list[i];
         float u = target.collision(ray);
         if(u > epsilon) {
             if(info.t > u || info.t < 0.0f) {
@@ -26,19 +26,20 @@ __device__ HitInfo closestHit(Ray& ray, targetList** listptr) {
     return info;
 }
 
-__device__ Vector3D Trace(Ray& ray, targetList** listptr, BackgroundColor* background, int depth, curandState randState) {
+__device__ Vector3D Trace(const Ray& ray, targetList** listptr, BackgroundColor* background, int depth, curandState randState) {
     Ray current = ray;
     Vector3D color(1.0f, 1.0f, 1.0f);
+    HitInfo info;
 
     for(int i = 0; i < depth; i++) {
-        HitInfo info = closestHit(current, listptr);
+        info = closestHit(current, listptr);
 
         if(info.t > epsilon) {
             color = 0.7f * color;
             Vector3D p = info.point, n = info.normal;
-            Vector3D dir = n + aux::randHemisphereVec(&randState, n);
+            Vector3D dir = n + aux::randUnitVec(&randState);
             while(dir.lengthSquared() < 0.001f) {
-                dir = n + aux::randHemisphereVec(&randState, n);
+                dir = n + aux::randUnitVec(&randState);
             }
             current = Ray(dir, p);
         } else {
