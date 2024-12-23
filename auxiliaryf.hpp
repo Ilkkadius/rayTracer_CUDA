@@ -10,6 +10,12 @@ static constexpr float epsilon = 0.00001f;
 
 namespace aux{
 
+    /**
+     * @brief Random float between [-1.0f, 1.0f]
+     * 
+     * @param state 
+     * @return __device__ 
+     */
     __device__ float randUnitFloat(curandState *state) {
         return 2.0f*curand_uniform(state) - 1.0f;
     }
@@ -37,7 +43,6 @@ namespace aux{
     }
 
 }
-
 
 
 #endif

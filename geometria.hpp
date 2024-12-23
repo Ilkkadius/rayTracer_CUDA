@@ -44,6 +44,8 @@ public:
         return res;        
     }
 
+
+
 };
 
 class Triangle : public Shape{
