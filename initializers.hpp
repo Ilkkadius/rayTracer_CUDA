@@ -8,6 +8,8 @@
 #include "compoundf.hpp"
 #include "auxiliaryf.hpp"
 #include "scenesf.hpp"
+#include "cameraf.hpp"
+#include "kernelSet.hpp"
 
 /*
     printf("\033[31mDEBUG: id\033[0m\n");
@@ -21,32 +23,47 @@
     }
 */
 
+/**
+ * @brief Methods for the CPU (host) to use before rendering
+ * 
+ */
+namespace Initializer{
 
+    __host__ void Window(WindowVectors* window, Camera& cam) {
+        cam.check();
+        CHECK(cudaMalloc(&window, sizeof(WindowVectors)));
+        CHECK(cudaMemcpy(window, &cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
+        std::cout << "Window ready" << std::endl;
+    }
 
+    __host__ void Background(BackgroundColor*** background) {
+        CHECK(cudaMalloc(background, sizeof(BackgroundColor*)));
+        initializeBG<<<1,1>>>(*background);
+        CHECK(cudaDeviceSynchronize());
+        std::cout << "Background ready" << std::endl;
+    }
 
-__device__ void createTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
-    int N = capacity;
-    switch(1) {
-        case 1:
-            Scene::Platon(list, targets, shapes, N);
-            break;
-        case 2:
-            Scene::testScene(list, targets, shapes, N);
-            break;
-        default:
-            Scene::empty(list, targets, shapes, N);
-            break;
+    __host__ void RandomStates(curandState** randState, int width, int height, dim3 blocks, dim3 threads) {
+        CHECK(cudaMalloc(randState, width*height*sizeof(curandState)));
+        initializeRand<<<blocks, threads>>>(*randState, width, height);
+        CHECK(cudaDeviceSynchronize());
+        std::cout << "Random states generated" << std::endl;
+    }
+
+    __host__ void BVH(BVHTree*** tree, targetList** list) {
+        CHECK(cudaMalloc(tree, sizeof(BVHTree*)));
+        CHECK(cudaDeviceSynchronize());
+        buildBVH<<<1,1>>>(list, *tree);
+        CHECK(cudaDeviceSynchronize());
+    }
+
+    __host__ void CompoundsToTargets(Compound** compounds, size_t compoundCount, targetList** list, Shape** shapes) {
+        addCompoundsToTargetlist<<<1,1>>>(compounds, compoundCount, list, shapes);
+        CHECK(cudaDeviceSynchronize());
     }
 }
 
-__device__ BackgroundColor* createBackground(int i = 1) {
-    switch(i % 2) {
-        case 1:
-            return new nightTime();
-        default:
-            return new dayTime();
-    }
-}
+
 
 
 #endif
