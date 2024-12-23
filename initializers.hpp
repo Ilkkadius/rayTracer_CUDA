@@ -30,18 +30,22 @@ __device__ void createTargets(Target** targets, targetList** list, Shape** shape
         case 1:
             Scene::Platon(list, targets, shapes, N);
             break;
-        default:
+        case 2:
             Scene::testScene(list, targets, shapes, N);
+            break;
+        default:
+            Scene::empty(list, targets, shapes, N);
             break;
     }
 }
 
-__device__ BackgroundColor* createDayTime() {
-    return new dayTime();
-}
-
-__device__ BackgroundColor* createNightTime() {
-    return new nightTime();
+__device__ BackgroundColor* createBackground(int i = 1) {
+    switch(i % 2) {
+        case 1:
+            return new nightTime();
+        default:
+            return new dayTime();
+    }
 }
 
 

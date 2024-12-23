@@ -1,7 +1,7 @@
 #ifndef COMPOUND_CUDA_HPP
 #define COMPOUND_CUDA_HPP
 
-#include "targetf.hpp"
+#include "targetList.hpp"
 #include "auxiliaryf.hpp"
 
 class Compound{
