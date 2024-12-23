@@ -35,13 +35,17 @@ __device__ Vector3D Trace(const Ray& ray, targetList** listptr, BackgroundColor*
         info = closestHit(current, listptr);
 
         if(info.t > epsilon) {
-            rayColor = info.target->color * rayColor;
-            Vector3D p = info.point, n = info.normal;
-            Vector3D dir = n + aux::randUnitVec(&randState);
-            while(dir.lengthSquared() < 0.001f) {
-                dir = n + aux::randUnitVec(&randState);
+            if(info.target->isRadiant()) {
+                return rayColor * info.target->emission();
+            } else {
+                rayColor = info.target->color * rayColor;
+                Vector3D p = info.point, n = info.normal;
+                Vector3D dir = n + aux::randUnitVec(&randState);
+                while(dir.lengthSquared() < 0.001f) {
+                    dir = n + aux::randUnitVec(&randState);
+                }
+                current = Ray(dir, p);
             }
-            current = Ray(dir, p);
         } else {
             return rayColor * background->colorize(current);
         }
@@ -63,7 +67,11 @@ __device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, targetLis
         color += Trace(rndRay, listptr, background, depth, randState);
         k++;
     }
-    return color/float(samples);
+    color = color/float(samples);
+    if(color.max() > 1) {
+        color = color/color.max();
+    }
+    return color;
 }
 
 #endif
