@@ -67,6 +67,34 @@ public:
         return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z);
     }
 
+    __host__ __device__ float operator[](int i) const {
+        switch(i) {
+            case 0:
+                return x;
+                break;
+            case 1:
+                return y;
+                break;
+            default:
+                return z;
+                break;
+        }
+    }
+
+    __host__ __device__ float& operator[](int i) {
+        switch(i) {
+            case 0:
+                return x;
+                break;
+            case 1:
+                return y;
+                break;
+            default:
+                return z;
+                break;
+        }
+    }
+
 
 }; //##############################################
 
@@ -169,6 +197,34 @@ __host__ __device__ Vector3D operator/(const Vector3D& vec, float t) {
  */
 __host__ __device__ Vector3D unitVec(const Vector3D& vec) {
     return vec/vec.length();
+}
+
+/**
+ * @brief Construct a new vector from the minimum components of each given vector
+ * 
+ * @param vec1 
+ * @param vec2 
+ * @return Vector3D 
+ */
+__host__ __device__ Vector3D minVector(const Vector3D& vec1, const Vector3D& vec2) {
+    float x = vec1.x < vec2.x ? vec1.x : vec2.x;
+    float y = vec1.y < vec2.y ? vec1.y : vec2.y;
+    float z = vec1.z < vec2.z ? vec1.z : vec2.z;
+    return Vector3D(x, y, z);
+}
+
+/**
+ * @brief Construct a new vector from the maximum components of each given vector
+ * 
+ * @param vec1 
+ * @param vec2 
+ * @return Vector3D 
+ */
+__host__ __device__ Vector3D maxVector(const Vector3D& vec1, const Vector3D& vec2) {
+    float x = vec1.x > vec2.x ? vec1.x : vec2.x;
+    float y = vec1.y > vec2.y ? vec1.y : vec2.y;
+    float z = vec1.z > vec2.z ? vec1.z : vec2.z;
+    return Vector3D(x, y, z);
 }
 
 

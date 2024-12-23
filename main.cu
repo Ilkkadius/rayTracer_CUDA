@@ -15,6 +15,7 @@
 #include "geometria.hpp"
 #include "cameraf.hpp"
 #include "logMethods.hpp"
+#include "imageBackupf.hpp"
 
 // PPC
 static inline void check(cudaError_t err, const char* context) {
@@ -43,11 +44,16 @@ __global__ void render(sf::Uint8 *pixels,
         targetList** list,
         BackgroundColor** background, 
         WindowVectors* window, 
-        curandState* randState) {
+        curandState* randState, bool left) {
             
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     if(i >= width || j >= height) return;
+    if(left) {
+        if(i >= width/2) return;
+    } else {
+        if(i < width/2) return;
+    }
 
     int idx = width * j + i;
     curandState rand = randState[idx];
@@ -126,10 +132,10 @@ int main() {
     Camera cam;
 
     int width = 1920, height = 1080;
-    int depth = 3, samples = 50;
+    int depth = 3, samples = 25000;
     int tx = 8, ty = 8;
 
-    std::cout << getDate() << " ::: " << getRawDate() << std::endl;
+    std::cout << getDate() << std::endl;
 
     cam.setFOV(80.0f);
 
@@ -188,13 +194,25 @@ int main() {
 
     render<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
-                                randState_d);
+                                randState_d, true);
     CHECK(cudaDeviceSynchronize());
-    
-    std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+
+    std::cout << "Half rendered, time so far: " << getDuration(duration) << std::endl;
+
+    render<<<blocks, threads>>>(pixels, width, height, depth, samples,
+                                list, background_d, cudaWindow, 
+                                randState_d, false);
+    CHECK(cudaDeviceSynchronize());
+
+    Backup::imageToFile("backup.txt", pixels, width, height);
+    
+    std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
+
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
     std::cout << "Rendertime: " << getDuration(duration, 3) << std::endl;
 
     //######################################
