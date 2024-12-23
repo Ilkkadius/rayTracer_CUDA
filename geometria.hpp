@@ -6,12 +6,28 @@
 #include "vector3D.hpp"
 #include "rayf.hpp"
 #include "auxiliaryf.hpp"
+#include "rotationf.hpp"
 
 class Shape{
 public:
     __device__ virtual Vector3D normal(const Vector3D& point) const = 0;
 
     __device__ virtual float rayCollision(const Ray& ray) const = 0;
+
+    __device__ virtual Vector3D centroid() const = 0;
+
+    __device__ virtual void translate(const Vector3D& vec) = 0;
+    __device__ virtual void translate(float x, float y, float z) = 0;
+
+    __device__ virtual void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) = 0;
+
+protected:
+
+    __device__ Vector3D rotateVec(const Vector3D& vec, double angle, 
+                                    const Vector3D& axis, const Vector3D& axisPos) {
+        Matrix rot = generateRotation(angle, axis);
+        return rot * (vec - axisPos) + axisPos;
+    }
 
 };
 
@@ -42,6 +58,19 @@ public:
             }
         }
         return res;        
+    }
+
+    __device__ Vector3D centroid() const {return center;}
+
+    __device__ void translate(const Vector3D& vec) {
+        center += vec;
+    }
+    __device__ void translate(float x, float y, float z) {
+        translate(Vector3D(x,y,z));
+    }
+
+    __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
+        center = rotateVec(center, angle, axis, axisPos);
     }
 
 
@@ -89,6 +118,24 @@ public:
         }
         return -1.0f;
     }
+
+    __device__ Vector3D centroid() const {
+        return (v0 + v1 + v2)/3.0f;
+    }
+
+    __device__ void translate(const Vector3D& vec) {
+        v0 += vec; v1 += vec; v2 += vec;
+    }
+    __device__ void translate(float x, float y, float z) {
+        translate(Vector3D(x,y,z));
+    }
+
+    __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
+        v0 = rotateVec(v0, angle, axis, axisPos);
+        v1 = rotateVec(v1, angle, axis, axisPos);
+        v2 = rotateVec(v2, angle, axis, axisPos);
+    }
+
 
 };
 

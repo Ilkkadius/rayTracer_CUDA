@@ -41,25 +41,11 @@ __device__ Matrix generateRotation(float a, char c) {
     } else if(c == 'z' || c == 'Z') {
         return RotationZ(a);
     } else {
-        throw std::invalid_argument("Error: wrong rotation axis");
+        printf("Error: Wrong rotation axis\n");
+        return Matrix();
     }
 }
 
-/**
- * @brief Generate a rotation matrix from three given angles w.r.t. the axes given by the order
- * 
- * @param a angle for 1st rotation (in radians)
- * @param b angle for 2nd rotation (in radians)
- * @param c angle for 3rd rotation (in radians)
- * @param order the axis for above rotation (e.g. "xyz", default "zxz")
- * @return Matrix 
- */
-__device__ Matrix generateRotation(float a, float b, float c, const std::string& order = "zxz") {
-    if(order.length() != 3) {
-        throw std::invalid_argument("Rotation order must have exactly three letters");
-    }
-    return generateRotation(c, order[2]) * generateRotation(b, order[1]) * generateRotation(a, order[0]);
-}
 
 /**
  * @brief Generate a rotation matrix from given angle w.r.t. the given axis
