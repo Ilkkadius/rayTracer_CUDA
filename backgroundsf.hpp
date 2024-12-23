@@ -30,8 +30,4 @@ public:
     Vector3D color_;
 };
 
-__device__ BackgroundColor* createDayTime() {
-    return new dayTime();
-}
-
 #endif

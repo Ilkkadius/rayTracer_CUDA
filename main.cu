@@ -5,7 +5,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-//#include "initializers.hpp"
+#include "initializers.hpp"
 #include "linearAlgebraf.hpp"
 #include "tracerf.hpp"
 #include "rayf.hpp"
