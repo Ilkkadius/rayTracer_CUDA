@@ -31,7 +31,7 @@ __device__ void createTargets(Target** targets, targetList** list, Shape** shape
     //targets[2] = new Target(shapes[2]);
     *list = new targetList(targets, 2, N);
 
-    Icosahedron ico(Vector3D(10,-2,2), 0.8f);
+    Tetrahedron ico(Vector3D(10,-2,2), 0.8f);
     ico.rotate(0.2, Vector3D(0,0,1));
     ico.copyToList(*list, shapes);
 
