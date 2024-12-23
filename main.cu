@@ -68,9 +68,9 @@ __global__ void initializeBG(BackgroundColor** background) {
     }
 }
 
-__global__ void initializeTargets(Target** targets, targetList** list, Shape** shapes) {
+__global__ void initializeTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
-        createTargets(targets, list, shapes);
+        createTargets(targets, list, shapes, capacity);
     }
 }
 
@@ -111,7 +111,7 @@ int main() {
     // #################################
 
     int width = 1920, height = 1080;
-    int depth = 10, samples = 500;
+    int depth = 5, samples = 1;
     int tx = 8, ty = 8;
 
     WindowVectors window = initialRays(Vector3D(0,0,0), Vector3D(1,0,0),
@@ -143,11 +143,11 @@ int main() {
     initializeRand<<<blocks, threads>>>(randState_d, width, height);
     CHECK(cudaDeviceSynchronize());
 
-    targetList** list; Target** targets; Shape** shapes; int N = 3;
+    targetList** list; Target** targets; Shape** shapes; int N = 4;
     CHECK(cudaMalloc(&list, sizeof(targetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
-    initializeTargets<<<1,1>>>(targets, list, shapes);
+    initializeTargets<<<1,1>>>(targets, list, shapes, N);
     CHECK(cudaDeviceSynchronize());
 
 

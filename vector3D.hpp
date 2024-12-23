@@ -42,11 +42,11 @@ public:
     }
 
     __host__ __device__ float length() const {
-        return sqrtf(this->lengthSquared());
+        return sqrtf(lengthSquared());
     }
 
     __host__ __device__ float norm() const {
-        return this->length();
+        return length();
     }
 
     /**
@@ -158,7 +158,7 @@ __host__ __device__ Vector3D operator*(const Vector3D& vec, float t) {
  * @return Vector3D 
  */
 __host__ __device__ Vector3D operator/(const Vector3D& vec, float t) {
-    return (1/t)*vec;
+    return (1.0f/t)*vec;
 }
 
 /**
