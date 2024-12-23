@@ -299,6 +299,78 @@ namespace FileOperations{
         return true;
     }
 
+    /**
+     * @brief Generate compounds from .obj file given by "path". NB: Currently generates only one compound
+     * 
+     * @param path 
+     * @param list 
+     * @param listCount 
+     * @param defaultColor 
+     * @return __host__ 
+     */
+    __host__ bool CompoundsFromFile(const char* path, Compound** list, size_t& listSize, const Vector3D& defaultColor = Vector3D(0.4,0.5,1)) {
+        dynVec<Vector3D> vertices(1<<7);                        // Store all vertices "v"
+        dynVec<Vector3D> fColors(1<<7);                         // Store colors "#"
+        dynVec<double*> uv(1<<7);                               // Store uv data "vt"
+        dynVec<Vector3D> normals(1<<7);                         // Store all normals "vn"
+        dynVec<int*> fVertices(1<<7), fNormals(1<<7);           // Save the indices given by face elements f/vt/fn
+
+        std::ifstream is(path);
+        if(!is.is_open()) {
+            std::cout << "Error in opening the file to read targets" << std::endl;
+            return false;
+        }
+        
+        while(ReadFunctions::ReadGroup(is, vertices, uv, normals, fVertices, fNormals, fColors)) {}
+        
+        Vector3D* verts, * fCols; int* fVerts;
+        CHECK(cudaMallocManaged(&verts, vertices.size() * sizeof(Vector3D)));
+        CHECK(cudaMallocManaged(&fCols, fColors.size() * sizeof(Vector3D)));
+        CHECK(cudaMallocManaged(&fVerts, 3 * fVertices.size() * sizeof(int*)));
+        CHECK(cudaDeviceSynchronize());
+        
+        for(int i = 0; i < vertices.size(); i++) {
+            verts[i] = vertices[i];
+        }
+        for(int i = 0; i < fVertices.size(); i++) {
+            int idx = 3*i; int* fv = fVertices[i];
+            fVerts[idx] = fv[0];
+            fVerts[idx + 1] = fv[1];
+            fVerts[idx + 2] = fv[2];
+        }
+
+        for(int i = 0; i < fColors.size(); i++) {
+            fCols[i] = fColors[i];
+        }
+
+        Vector3D* defCol;
+        CHECK(cudaMallocManaged(&defCol, sizeof(Vector3D)));
+        *defCol = defaultColor;
+
+        generateCompounds<<<1, 1>>>(list, verts, fVerts, fCols, fVertices.size(), defCol); listSize = 1;
+        CHECK(cudaDeviceSynchronize());
+
+        if(is.is_open()) {
+            is.close();
+        }
+
+        for(int i = 0; i < uv.size(); i++) {
+            delete[] uv[i];
+        }
+        for(int i = 0; i < fVertices.size(); i++) {
+            delete[] fVertices[i];
+        }
+        for(int i = 0; i < fNormals.size(); i++) {
+            delete[] fNormals[i];
+        }
+
+        CHECK(cudaFree(verts));
+        CHECK(cudaFree(fCols));
+        CHECK(cudaFree(fVerts));
+
+        return true;
+    }
+
 
 } // End fileOperations namespace
 
