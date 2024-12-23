@@ -122,6 +122,10 @@ private:
 
 };
 
+/**
+ * @brief Tetrahedron compound, 4 triangles
+ * 
+ */
 class Tetrahedron : public Compound{
 public:
     
@@ -148,6 +152,10 @@ private:
     }
 };
 
+/**
+ * @brief Icosahedron compound, 20 triangles
+ * 
+ */
 class Icosahedron : public Compound{
 public:
     __device__ Icosahedron(const Vector3D& center, float radius, const Vector3D& color)
@@ -187,6 +195,10 @@ private:
     }
 };
 
+/**
+ * @brief Pentagon compound, 3 triangles
+ * 
+ */
 class Pentagon : public Compound{
 public:
     __device__ Pentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5, const Vector3D& color)
@@ -201,6 +213,10 @@ private:
     }
 };
 
+/**
+ * @brief Dodecahedron compound, 36 triangles
+ * 
+ */
 class Dodecahedron : public Compound{
 public:
     __device__ Dodecahedron(const Vector3D& center, float radius, const Vector3D& color)
@@ -241,6 +257,10 @@ private:
     }
 };
 
+/**
+ * @brief Octahedron compound, 8 triangles
+ * 
+ */
 class Octahedron : public Compound{
 public:
     __device__ Octahedron(const Vector3D& center, float radius, const Vector3D& color)
@@ -267,6 +287,10 @@ private:
 
 };
 
+/**
+ * @brief Cube compound, 12 triangles
+ * 
+ */
 class Cube : public Compound{
 public:
     __device__ Cube(const Vector3D& center, float radius, const Vector3D& color)
