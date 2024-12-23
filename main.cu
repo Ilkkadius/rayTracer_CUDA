@@ -87,8 +87,11 @@ int main() {
     cam.width = width; cam.height = height;
     cam.depth = depth; cam.samples = samples;
 
+    cam.eye = eye;
+    cam.direction = direction;
+    cam.up = up;
+
     cam.check();
-    cam.initializeWindow();
 
     if(partition < 0 || partition > 3) {
         std::cout << "ERROR: Invalid partition value" << std::endl;
@@ -157,10 +160,6 @@ int main() {
         realtimeRender::startCamera(cam, tree, background_d, randState_d, eye, direction, up); // TREE
         return 0;
     }
-
-    cam.eye = eye;
-    cam.direction = direction;
-    cam.up = up;
 
     // ####################################################################
 
