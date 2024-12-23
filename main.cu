@@ -138,6 +138,12 @@ int main() {
         FileOperations::TargetsFromFile("teapot.obj", list, shapes);
         CHECK(cudaDeviceSynchronize());
     }
+
+    Compound** compounds; size_t compoundCount;
+    CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
+    CHECK(cudaDeviceSynchronize());
+    //FileOperations::CompoundsFromFile("teapot.obj", compounds, compoundCount);
+    //addCompoundsToTargetlist<<<1,1>>>(compounds, 1, list, shapes);
     
     BVHTree** tree;
     CHECK(cudaMalloc(&tree, sizeof(BVHTree*)));
