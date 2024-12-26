@@ -49,7 +49,14 @@ static inline void check(cudaError_t err, const char* context) {
 
 // ################################################################
 
+// Dynamic:
 // nvcc main.cu -o main -lsfml-graphics -lsfml-window -lsfml-system
+
+// Static
+// nvcc main.cu -o main -I./dependencies/include -DSFML_STATIC -L./dependencies/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lfreetype -lwinmm -lgdi32
+
+// nvcc main.cu -o main -w -I./dependencies/include -L./dependencies/lib -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lfreetype -lwinmm -lgdi32
+
 
 int main() {
     // #################################
@@ -61,7 +68,7 @@ int main() {
     int width = 1920, height = 1080;
     int depth = 4, samples = 100;
     int tx = 8, ty = 8;
-    bool backup = true;
+    bool backup = false;
     int partition = 0;
     bool realTime = false;
     bool fileRead = false;
@@ -76,10 +83,10 @@ int main() {
     // # LOAD DATA TO DEVICE
     // #################################
 
-    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
-    std::cout << "\033[0;93m#        Ray tracer (GPU)       #\033[0m" << std::endl;
-    std::cout << "\033[0;93m# Date: " << getDate() << " #\033[0m" << std::endl;
-    std::cout << "\033[0;93m#################################\033[0m" << std::endl;
+    std::cout << "#################################" << std::endl;
+    std::cout << "#        Ray tracer (GPU)       #" << std::endl;
+    std::cout << "# Date: " << getDate() << " #" << std::endl;
+    std::cout << "#################################" << std::endl;
 
     std::cout << "Resolution: " << width << "x" << height << ", N = " << samples << ", recursion = " << depth << std::endl;
     std::cout << "Backup to file: " << (backup ? "\033[1;32m" : "\033[1;31m") << std::boolalpha << backup << "\033[0m" << std::endl;
@@ -163,7 +170,7 @@ int main() {
 
     // ####################################################################
 
-    std::cout << "\033[0;32mGPU rendering started\033[0m" << std::endl;
+    std::cout << "GPU rendering started" << std::endl;
 
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
@@ -233,7 +240,7 @@ int main() {
         auto prevDuration = duration;
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-        std::cout << "50% rendered, time so far: " << getDuration(duration) << " (\u0394t = " << getRawDuration(duration - prevDuration) << ")" << std::endl;
+        std::cout << "50% rendered, time so far: " << getDuration(duration) << " (t = " << getRawDuration(duration - prevDuration) << ")" << std::endl;
 
         renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
@@ -247,7 +254,7 @@ int main() {
         prevDuration = duration;
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-        std::cout << "75% rendered, time so far: " << getDuration(duration) << " (\u0394t = " << getRawDuration(duration - prevDuration) << ")" << std::endl;
+        std::cout << "75% rendered, time so far: " << getDuration(duration) << " (t = " << getRawDuration(duration - prevDuration) << ")" << std::endl;
 
         renderQuarter<<<blocks, threads>>>(pixels, width, height, depth, samples,
                                 list, background_d, cudaWindow, 
@@ -265,7 +272,7 @@ int main() {
         Backup::fullImageToBinary(pixels, width, height);
     
     
-    std::cout << "\033[32;1mSuccessfully rendered & synchronized!\033[0m" << std::endl;
+    std::cout << "Successfully rendered & synchronized!" << std::endl;
 
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
@@ -284,12 +291,12 @@ int main() {
     std::string filename = getImageFilename(width, height, samples, duration);
     if(!image.saveToFile("figures/" + filename)) {
         if(!image.saveToFile(filename)) {
-            std::cout << "\033[31mImage was not saved...\033[0m" << std::endl;
+            std::cout << "Image was not saved..." << std::endl;
         } else {
-            std::cout << "\033[32;1mImage saved!\033[0m" << std::endl;
+            std::cout << "Image saved!" << std::endl;
         }
     } else {
-        std::cout << "\033[32;1mImage saved!\033[0m" << std::endl;
+        std::cout << "Image saved!" << std::endl;
     }
 
     CHECK(cudaFree(cudaWindow));

@@ -6,6 +6,8 @@
 
 #include "vector3D.hpp"
 
+#define M_PI 3.14159265358979323846
+
 static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will occur
 static constexpr float phi = 1.61803f;
 

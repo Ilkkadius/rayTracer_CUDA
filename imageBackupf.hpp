@@ -78,7 +78,7 @@ namespace Backup{
             std::cout << "\033[31mError in opening the file\033[0m" << std::endl;
         }
 
-        sf::Uint8 pixels[width*height*4];
+        sf::Uint8* pixels = new sf::Uint8[width*height*4];
         std::string line;
         int row = 0, column = -1;
         while(std::getline(is, line)) {
@@ -108,6 +108,7 @@ namespace Backup{
         texture.create(width, height);
         sf::Sprite sprite(texture);
         texture.update(pixels);
+        delete[] pixels;
         sf::Image image = texture.copyToImage();
         if(!image.saveToFile("" + getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) + "_GPU_backup.png")) {
             return false;
@@ -178,7 +179,7 @@ namespace Backup{
 
         sf::Texture texture;
         texture.create(width, height);
-        sf::Uint8 pixels[width*height*4];
+        sf::Uint8* pixels = new sf::Uint8[width*height*4];
 
         std::ifstream bis(binary, std::ifstream::binary), ord(order);
 
@@ -214,6 +215,7 @@ namespace Backup{
             filename.pop_back();
 
             texture.update(pixels);
+            delete[] pixels;
             sf::Image image = texture.copyToImage();
             if(!image.saveToFile(filename + ".png")) {
                 std::cout << "ERROR: Could not save to file" << std::endl;
@@ -260,7 +262,7 @@ namespace Backup{
 
         sf::Texture texture;
         texture.create(width, height);
-        sf::Uint8 pixels[width*height*4];
+        sf::Uint8* pixels = new sf::Uint8[width*height*4];
 
         std::ifstream bis(binary, std::ifstream::binary);
 
@@ -287,6 +289,7 @@ namespace Backup{
             filename.pop_back();
 
             texture.update(pixels);
+            delete[] pixels;
             sf::Image image = texture.copyToImage();
             if(!image.saveToFile(filename + ".png")) {
                 std::cout << "ERROR: Could not save to file" << std::endl;

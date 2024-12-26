@@ -26,7 +26,7 @@
 
 __device__ void createTargets(Target** targets, targetList** list, Shape** shapes, int capacity) {
     int N = capacity;
-    switch(1) {
+    switch(2) {
         case 1:
             Scene::Platon(list, targets, shapes, N);
             break;
