@@ -1,5 +1,6 @@
 #include "imageBackupf.hpp"
 #include "filesystem"
+#include "termcolor.hpp"
 
 __host__ bool isOrderedBinary(const std::string& stem) {
     std::stringstream ss(stem);
@@ -26,6 +27,7 @@ __host__ bool isColumnorder(const std::string& stem) {
 int main() { 
 
     // nvcc buildImage.cu -o buildImage -std=c++17 -lsfml-graphics -lsfml-window -lsfml-system
+    // nvcc buildImage.cu src/imageBackupf.cpp src/logMethods.cpp -o buildImage -std=c++17 -w -Isrc -Idependencies/include -Ldependencies/lib -lsfml-graphics -lsfml-window -lsfml-system
 
     /**
      * @brief Builds the image from a backup file 
@@ -34,36 +36,36 @@ int main() {
 
     std::string current = ".";
 
-    std::cout << "\033[0;93m##################################\033[0m" << std::endl;
-    std::cout << "\033[0;93m#   Build an image from a file   #\033[0m" << std::endl;
-    std::cout << "\033[0;93m##################################\033[0m" << std::endl;
-
-    std::cout << "\033[0;93mFollowing backup files found:\033[0m" << std::endl;
+    std::cout << termcolor::bright_yellow << 
+    "##################################\n"
+    "#   Build an image from a file   #\n"
+    "##################################\n"
+    "Following backup files found:" << termcolor::reset << std::endl;
 
     std::vector<std::string> files;
 
     int i = 0;
     for(auto f : std::filesystem::directory_iterator(current)) {
         if(f.is_regular_file() && f.path().extension() == ".txt" && !isColumnorder(f.path().stem().string())) {
-            std::cout << "\033[1;34m" << i << "\033[0m" << ": " << f.path().filename() << std::endl;
-            files.push_back(f.path().filename());
+            std::cout << termcolor::bold << termcolor::blue << i << termcolor::reset << ": " << f.path().filename() << std::endl;
+            files.push_back(f.path().filename().string());
             i++;
         } else if(f.is_regular_file() && f.path().extension() == ".bin") {
             std::string column(current + "/" + f.path().stem().string() + "_columnorder.txt");
             if(std::filesystem::exists(std::filesystem::path(column)) || isOrderedBinary(f.path().stem().string())) { // Print only those that have a columnorder file OR are ordered
-                std::cout << "\033[1;34m" << i << "\033[0m" << ": " << f.path().filename() << std::endl;
-                files.push_back(f.path().filename());
+                std::cout << termcolor::bold << termcolor::blue << i << termcolor::reset << ": " << f.path().filename() << std::endl;
+                files.push_back(f.path().filename().string());
                 i++;
             }
         }
     }
 
     int idx = 0; std::string in;
-    std::cout << "\033[0;93mSelect the file by giving its index:\033[0m ";
+    std::cout << termcolor::yellow << "Select the file by giving its index:" << termcolor::reset;
     getline(std::cin, in);
     std::stringstream(in) >> idx;
     while(idx >= files.size() || idx < 0) {
-        std::cout << "\033[31mERROR: Index not found\033[0m" << std::endl;
+        std::cout << termcolor::red << "ERROR: Index not found" << termcolor::reset << std::endl;
         std::cout << "Try again: ";
         getline(std::cin, in);
         std::stringstream(in) >> idx;
@@ -72,7 +74,7 @@ int main() {
 
     if(files[idx].back() == 't') { // .txt-files
         int width = 1920, height = 1080;
-        std::cout << "\033[0;93mProvide resolution or press enter to use 1920x1080:\033[0m ";
+        std::cout << termcolor::bright_yellow << "Provide resolution or press enter to use 1920x1080: " << termcolor::reset;
         std::string res;
         getline(std::cin, res);
         if(!res.empty()) {
@@ -82,9 +84,9 @@ int main() {
         }
 
         if(!Backup::textToImage(files[idx], width, height)) {
-            std::cout << "\033[31mError: Could not save image\033[0m" << std::endl;
+            std::cout << termcolor::red << "Error: Could not save image" << termcolor::reset << std::endl;
         } else {
-            std::cout << "\033[1;32mImage generated!\033[0m" << std::endl;
+            std::cout << termcolor::bold << termcolor::green << "Image generated!" << termcolor::reset << std::endl;
         }
     } else { // .bin files
         std::string filename(files[idx]);
@@ -95,15 +97,15 @@ int main() {
 
         if(isOrderedBinary(files[idx])) {
             if(!Backup::fullBinaryToImage(files[idx])) {
-                std::cout << "\033[31mError: Could not save image\033[0m" << std::endl;
+                std::cout << termcolor::red << "Error: Could not save image" << termcolor::reset << std::endl;
             } else {
-                std::cout << "\033[1;32mImage generated!\033[0m" << std::endl;
+                std::cout << termcolor::bold << termcolor::green << "Image generated!" << termcolor::reset << std::endl;
             }
         } else {
             if(!Backup::binaryToImage(files[idx], filename + "_columnorder.txt")) {
-                std::cout << "\033[31mError: Could not save image\033[0m" << std::endl;
+                std::cout << termcolor::red << "Error: Could not save image" << termcolor::reset << std::endl;
             } else {
-                std::cout << "\033[1;32mImage generated!\033[0m" << std::endl;
+                std::cout << termcolor::bold << termcolor::green << "Image generated!" << termcolor::reset << std::endl;
             }
         }
     }
