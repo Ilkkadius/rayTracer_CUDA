@@ -4,6 +4,8 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
+#include <algorithm>
+
 #include "vector3D.hpp"
 
 #define M_PI 3.14159265358979323846
@@ -47,6 +49,9 @@ namespace aux{
     __device__ Vector3D randUnitVec(curandState *state);
 
     __device__ Vector3D randHemisphereVec(curandState *state, const Vector3D& normal);
+
+    __host__ void uppercase(std::string& s);
+    __host__ bool stringToInt(const std::string& str, int& num);
 
 }
 

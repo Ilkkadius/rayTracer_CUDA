@@ -26,3 +26,18 @@ __device__ Vector3D aux::randHemisphereVec(curandState *state, const Vector3D& n
     }
     return vec;
 }
+
+__host__ void aux::uppercase(std::string& s) {
+    auto upper = [](char c) {return std::toupper(c);};
+    std::transform(s.begin(), s.end(), s.begin(), upper);
+}
+
+__host__ bool aux::stringToInt(const std::string& str, int& num) {
+    char* p;
+    float t = std::strtod(str.c_str(), &p);
+    if(*p) {
+        return false;
+    }
+    num = t;
+    return true;
+}
