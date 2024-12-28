@@ -23,29 +23,6 @@
 #include "kernelSet.hpp"
 #include "realtimeRenderf.hpp"
 
-// PPC
-#ifndef CHECK_FUNC
-static inline void check(cudaError_t err, const char* context) {
-    if (err != cudaSuccess) {
-        std::cerr << "CUDA error: " << context << ": "
-            << cudaGetErrorString(err) << std::endl;
-        std::exit(EXIT_FAILURE);
-    }
-}
-
-#define CHECK(x) check(x, #x)
-#endif
-
-#ifndef divup_FUNC
-    static inline int divup(int a, int b) {
-        return (a + b - 1)/b;
-    }
-#endif
-
-//static inline int roundup(int a, int b) {
-//    return divup(a, b) * b;
-//}
-
 
 // ################################################################
 
@@ -58,8 +35,8 @@ static inline void check(cudaError_t err, const char* context) {
 // nvcc main.cu -o main -w -I./dependencies/include -L./dependencies/lib -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lfreetype -lwinmm -lgdi32
 
 #define SINGLE_KERNEL_RENDER FALSE
-#define KERNEL_RUNTIME_MAX_LIMIT 1.6f
-#define KERNEL_RUNTIME_MIN_LIMIT 0.8f
+#define KERNEL_RUNTIME_MAX_LIMIT 1.5f
+#define KERNEL_RUNTIME_MIN_LIMIT 0.5f
 #define MAXIMUM_CURANDSTATE_MEMORY 1000000000 // In bytes
 
 int main() {
@@ -70,7 +47,7 @@ int main() {
     Camera cam;
 
     int width = 1920, height = 1080;
-    int depth = 4, samples = 100;
+    int depth = 4, samples = 10000;
     int tx = 8, ty = 8;
     bool backup = true;
     bool realTime = false;
