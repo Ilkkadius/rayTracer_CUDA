@@ -16,12 +16,6 @@ static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will o
 static constexpr float phi = 1.61803f;
 typedef unsigned int uint;
 
-typedef struct {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-} pixel;
-
 #define CHECK_FUNC
 static inline void check(cudaError_t err, const char* context) {
     if (err != cudaSuccess) {
