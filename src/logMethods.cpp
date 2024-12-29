@@ -1,11 +1,11 @@
 #include "logMethods.hpp"
 
-__host__ std::string zero2front(int a)
+std::string zero2front(int a)
 {
     return a >= 10 ? "" : "0";
 }
 
-__host__ std::string getDate() {
+std::string getDate() {
     auto t = std::chrono::system_clock::now();
     time_t tt = std::chrono::system_clock::to_time_t(t);
     tm* timeInfo = localtime(&tt);
@@ -15,7 +15,7 @@ __host__ std::string getDate() {
     return std::string(buffer);
 }
 
-__host__ int getMonthNumber(const std::string& month) {
+int getMonthNumber(const std::string& month) {
     if(month[2] == 'n') {
         return (month[1] == 'a' ? 1 : 6);
     } else if(month[2] == 'b') {
@@ -39,7 +39,7 @@ __host__ int getMonthNumber(const std::string& month) {
     }
 }
 
-__host__ std::string getRawDate() {
+std::string getRawDate() {
     auto t = std::chrono::system_clock::now();
     time_t tt = std::chrono::system_clock::to_time_t(t);
     tm* timeInfo = localtime(&tt);
@@ -76,7 +76,7 @@ std::string getImageDimensions(int width, int height) {
     return std::to_string(width) + "x" + std::to_string(height);
 }
 
-__host__ std::string getImageFilename(int width, int height, int samples, double duration) {
+std::string getImageFilename(int width, int height, int samples, double duration) {
     std::stringstream ss;
     ss << width << "x" << height << "_" << samples << "samples_" << getRawDuration(duration, 0);
     return getRawDate() + "_GPU_" + ss.str() + "_figure.png";
