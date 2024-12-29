@@ -28,6 +28,19 @@ __global__ void completeRender(sf::Uint8 *pixels,
     WindowVectors* window, 
     curandState* randState);
 
+/**
+ * @brief Calculates pixel values and adds them to pixels
+ * 
+ * @param pixels Allocated Vector3D array of size width*height
+ * @param width 
+ * @param height 
+ * @param depth Number of iterations for a single ray
+ * @param samples Number of iterations for a single pixel
+ * @param tree BVH structure for objects in the scene
+ * @param background Defines background color for escaping rays
+ * @param window Defines image ray positioning
+ * @param randState Defines the random number generator for each thread
+ */
 __global__ void completeRender(Vector3D* pixels, 
     int width, int height, 
     int depth, int samples,
@@ -45,6 +58,21 @@ __global__ void renderPixel(Vector3D* color,
     WindowVectors* window, 
     curandState* randState);
 
+/**
+ * @brief Calculates pixels sequentially starting from index "pixelIdx",
+ *          gridDim.y in kernel launch sets the number of pixels
+ * 
+ * @param color Allocated Vector3D array of size width*height, unnormalized
+ * @param pixelIdx Starting index: x + y*width
+ * @param width 
+ * @param height 
+ * @param depth Number of iterations for a single ray
+ * @param samples Number of iterations for a single pixel
+ * @param tree BVH structure for objects in the scene
+ * @param background Defines background color for escaping rays
+ * @param window Defines image ray positioning
+ * @param randState Defines the random number generator for each thread
+ */
 __global__ void renderPixels(Vector3D* color, 
     int pixelIdx,
     int width, int height,
