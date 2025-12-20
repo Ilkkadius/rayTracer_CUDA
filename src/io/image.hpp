@@ -10,7 +10,7 @@
 #include <vector>
 #include <mutex>
 
-#include "logMethods.hpp"
+#include "auxiliaryf.hpp"
 #include "termcolor.hpp"
 
 namespace Image {
@@ -23,6 +23,14 @@ namespace Image {
 
     bool fromBinary(const std::string& binaryFile);
 
+
+    /**
+     * @brief e.g. 1920x1080
+     * 
+     */
+    std::string getImageDimensions(int width, int height);
+
+    std::string getImageFilename(int width, int height, int samples, double duration);
 };
 
 #endif

@@ -2,7 +2,7 @@
 
 void Image::ToBinary(sf::Uint8* pixels, int width, int height) {
     std::lock_guard<std::mutex> lock(binaryMutex);
-    std::string path(getRawDate() + "_" + getImageDimensions(width, height) + ".bin");
+    std::string path(aux::getRawDate() + "_" + getImageDimensions(width, height) + ".bin");
 
     std::ofstream file(path, std::ofstream::binary);
     if(!file.is_open()) {
@@ -77,3 +77,12 @@ void Image::writePNG(sf::Uint8* pixels, int width, int height, int samples, doub
     }
 }
 
+std::string Image::getImageDimensions(int width, int height) {
+    return std::to_string(width) + "x" + std::to_string(height);
+}
+
+std::string Image::getImageFilename(int width, int height, int samples, double duration) {
+    std::stringstream ss;
+    ss << width << "x" << height << "_" << samples << "samples_" << aux::getRawDuration(duration, 0);
+    return aux::getRawDate() + "_GPU_" + ss.str() + "_figure.png";
+}
