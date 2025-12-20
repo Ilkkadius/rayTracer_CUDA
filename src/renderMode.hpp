@@ -1,6 +1,15 @@
 #ifndef RENDERMODE_CUDA_HPP
 #define RENDERMODE_CUDA_HPP
 
+#include <iostream>
+#include <iomanip>
+
+#include <cuda_runtime.h>
+#include <curand_kernel.h>
+
+#include "auxiliaryf.hpp"
+#include "kernelSet.hpp"
+
 enum class RenderMode {
     Single_full,
     Partial_full,

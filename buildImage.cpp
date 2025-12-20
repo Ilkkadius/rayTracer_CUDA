@@ -1,4 +1,4 @@
-#include "imageBackupf.hpp"
+#include "image.hpp"
 #include "filesystem"
 #include "termcolor.hpp"
 
@@ -45,7 +45,7 @@ int main() {
     std::cout << "Selected file: " << files[idx] << std::endl;
 
     
-    if(!Backup::binaryToImage(files[idx])) {
+    if(!Image::fromBinary(files[idx])) {
         std::cout << termcolor::red << "Error: Could not save image" << termcolor::reset << std::endl;
     } else {
         std::cout << termcolor::bold << termcolor::green << "Image generated!" << termcolor::reset << std::endl;

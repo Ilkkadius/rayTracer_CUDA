@@ -17,7 +17,7 @@
 #include "geometria.hpp"
 #include "cameraf.hpp"
 #include "logMethods.hpp"
-#include "imageBackupf.hpp"
+#include "image.hpp"
 #include "BVHf.hpp"
 #include "meshRead.hpp"
 #include "kernelSet.hpp"
@@ -207,42 +207,15 @@ int main(int argc, char *argv[]) {
 
 
     if(backup) {
-        Backup::imageToBinary(pixels, width, height);
+        Image::ToBinary(pixels, width, height);
     }
 
     //######################################
     // # GENERATE IMAGE, FREE MEMORY
     //######################################
 
-    sf::Texture texture;
-    texture.create(width, height);
-    texture.update(pixels);
-
+    Image::writePNG(pixels, width, height, samples, duration);
     delete[] pixels;
-
-    std::string filename = getImageFilename(width, height, samples, duration);
-
-    sf::Image image = texture.copyToImage();
-
-    std::string prefix = "figures/";
-    if(!image.saveToFile(prefix + filename)) {
-        std::cout << "Trying again..." << std::endl;
-        prefix = "../" + prefix;
-        if(!image.saveToFile(prefix + filename)) {
-            std::cout << "Trying again..." << std::endl;
-            if(!image.saveToFile(filename)) {
-                std::cout << termcolor::red << "Image was not saved..." << termcolor::reset << std::endl;
-            } else {
-                std::cout << "Successfully saved the image to the current directory" << std::endl;
-            }
-
-        } else {
-            std::cout << "Successfully saved the image \"" << prefix + filename << "\"" << std::endl;
-        }    
-    } else {
-        std::cout << "Successfully saved the image \"" << prefix + filename << "\"" << std::endl;
-    }
-
 
     CHECK(cudaFree(results));
     CHECK(cudaFree(cudaWindow));
