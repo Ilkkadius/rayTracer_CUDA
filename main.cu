@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     int width = 1920, height = 1080;
     int depth = 4, samples = 10;
     int tx = 8, ty = 8;
-    bool backup = true;
+    bool backup = false;
     bool realTime = false;
     bool fileRead = false;
 
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
     curandState *randState_d;
 
     switch(launchMode) {
-        case Single_kernel:
+        case Single_kernel: // Full image rendered by one kernel
             {
             dim3 blocks(divup(width, tx), divup(height, ty));
             dim3 threads(tx, ty);
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
             CHECK(cudaDeviceSynchronize());
             }
             break;
-        case Partial_full:
+        case Partial_full: // Set of kernels each rendering the full image, but number of samples divided evenly among the kernels
             {
             dim3 blocks(divup(width, tx), divup(height, ty));
             dim3 threads(tx, ty);
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
             }
             }
             break;
-        case Partial_pixel:
+        case Partial_pixel: // A large set of kernels each rendering one or many pixels of the image
             int threadsPerBlock = THREADS_PER_BLOCK;
             int blockNum = divup(samples, threadsPerBlock);
             int maximum_offset_length = MAXIMUM_CURANDSTATE_MEMORY/(threadsPerBlock*blockNum*sizeof(curandState));
