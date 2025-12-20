@@ -1,4 +1,4 @@
-#include "scatteringf.hpp"
+#include "hitInfof.hpp"
 
 __device__ HitInfo::HitInfo() : rayDir(Vector3D()), point(Vector3D()), normal(Vector3D()), t(-1.0f) {}
 

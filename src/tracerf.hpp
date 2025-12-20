@@ -7,7 +7,7 @@
 #include "vector3D.hpp"
 #include "rayf.hpp"
 #include "backgroundsf.hpp"
-#include "scatteringf.hpp"
+#include "hitInfof.hpp"
 #include "targetList.hpp"
 #include "auxiliaryf.hpp"
 #include "BVHf.hpp"
