@@ -3,7 +3,7 @@
 
 #include <cuda_runtime.h>
 
-#include "scatteringf.hpp"
+#include "hitInfof.hpp"
 #include "targetList.hpp"
 
 constexpr float maxDist = 1e20f;

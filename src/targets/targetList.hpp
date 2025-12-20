@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 
 #include "targetf.hpp"
-#include "scatteringf.hpp"
+#include "hitInfof.hpp"
 
 class TargetList{
 public:

@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     if(argc == 2) {
         std::string mode = argv[1];
         aux::uppercase(mode);
-        if(mode == "SINGLE") {
+        if(mode == "SINGLE" || "FULL") {
             launchMode = Single_kernel;
         } else if(mode == "PARTFULL" || mode == "PARTIALFULL" || mode == "PARTIALLYFULL") {
             launchMode = Partial_full;
