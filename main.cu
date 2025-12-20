@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     Camera cam;
 
     int width = 1920, height = 1080;
-    int depth = 4, samples = 1000;
+    int depth = 4, samples = 10;
     int tx = 8, ty = 8;
     bool backup = true;
     bool realTime = false;
