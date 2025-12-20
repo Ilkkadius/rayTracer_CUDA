@@ -175,13 +175,13 @@ int main(int argc, char *argv[]) {
 
     switch(launchMode) {
         case RenderMode::Single_full: // Full image rendered by one kernel
-            Mode::FullRender(width, height, tx, ty, start, randState_d, results, depth, samples, tree, background_d, cudaWindow);
+            Mode::FullRender(width, height, tx, ty, start, &randState_d, results, depth, samples, tree, background_d, cudaWindow);
             break;
         case RenderMode::Partial_full: // Set of kernels each rendering the full image, but number of samples divided evenly among the kernels
-            Mode::partialFullRender(width, height, tx, ty, start, randState_d, results, depth, samples, tree, background_d, cudaWindow);
+            Mode::partialFullRender(width, height, tx, ty, start, &randState_d, results, depth, samples, tree, background_d, cudaWindow);
             break;
         case RenderMode::Partial_pixel: // A large set of kernels each rendering one or many pixels of the image
-            Mode::partialPixelRender(width, height, tx, ty, start, randState_d, results, depth, samples, tree, background_d, cudaWindow);
+            Mode::partialPixelRender(width, height, tx, ty, start, &randState_d, results, depth, samples, tree, background_d, cudaWindow);
             break;
     }
 
