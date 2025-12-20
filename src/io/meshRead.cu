@@ -1,6 +1,6 @@
-#include "fileOperations.hpp"
+#include "meshRead.hpp"
 
-__host__ bool FileOperations::ReadFunctions::readVertex(std::string& str, dynVec<Vector3D>& vertices) {
+__host__ bool MeshRead::ReadFunctions::readVertex(std::string& str, dynVec<Vector3D>& vertices) {
     std::string v; double X, Y, Z;
     std::stringstream(str) >> v >> X >> Y >> Z;
     if(v != "v") {
@@ -10,7 +10,7 @@ __host__ bool FileOperations::ReadFunctions::readVertex(std::string& str, dynVec
     return true;
 }
 
-__host__ bool FileOperations::ReadFunctions::readUV(std::string& str, dynVec<double*>& uv) {
+__host__ bool MeshRead::ReadFunctions::readUV(std::string& str, dynVec<double*>& uv) {
     std::string vt; double U, V;
     std::stringstream(str) >> vt >> U >> V;
     if(vt != "vt") {
@@ -21,7 +21,7 @@ __host__ bool FileOperations::ReadFunctions::readUV(std::string& str, dynVec<dou
     return true;
 }
 
-__host__ bool FileOperations::ReadFunctions::readNormal(std::string& str, dynVec<Vector3D>& normals) {
+__host__ bool MeshRead::ReadFunctions::readNormal(std::string& str, dynVec<Vector3D>& normals) {
     std::string vn; double X, Y, Z;
     std::stringstream(str) >> vn >> X >> Y >> Z;
     if(vn != "vn") {
@@ -31,7 +31,7 @@ __host__ bool FileOperations::ReadFunctions::readNormal(std::string& str, dynVec
     return true;
 }
 
-__host__ int FileOperations::ReadFunctions::FaceElemIdx(const std::string& faceElem, int elemIdx) {
+__host__ int MeshRead::ReadFunctions::FaceElemIdx(const std::string& faceElem, int elemIdx) {
     std::stringstream ss(faceElem);
     int index; std::string buffer;
     for(int i = 0; i < elemIdx + 1; i++)
@@ -41,7 +41,7 @@ __host__ int FileOperations::ReadFunctions::FaceElemIdx(const std::string& faceE
     return -1;
 }
 
-__host__ bool FileOperations::ReadFunctions::FaceSepColor(std::string& line, std::string& faceData, Vector3D& faceColor) {
+__host__ bool MeshRead::ReadFunctions::FaceSepColor(std::string& line, std::string& faceData, Vector3D& faceColor) {
     if(std::getline(std::stringstream(line), faceData, '#')) {
         if(line.length() > faceData.length()) {
             double r, g, b;
@@ -53,7 +53,7 @@ __host__ bool FileOperations::ReadFunctions::FaceSepColor(std::string& line, std
     return false;
 }
 
-__host__ bool FileOperations::ReadFunctions::readTriangle(std::stringstream& ss, std::string& firstVertex, 
+__host__ bool MeshRead::ReadFunctions::readTriangle(std::stringstream& ss, std::string& firstVertex, 
                                                             std::string& secondVertex, dynVec<int*>& fVertices, dynVec<int*>& fNormals) {
     std::string v;
     if(!(ss >> v)) return false;
@@ -76,7 +76,7 @@ __host__ bool FileOperations::ReadFunctions::readTriangle(std::stringstream& ss,
 }
 
 
-__host__ bool FileOperations::ReadFunctions::readFace(std::string& line, dynVec<int*>& fVertices, 
+__host__ bool MeshRead::ReadFunctions::readFace(std::string& line, dynVec<int*>& fVertices, 
                                                         dynVec<Vector3D>& fColors, dynVec<int*>& fNormals) {
     std::string faceData;
     Vector3D faceColor(-1.0,-1.0,-1.0);
@@ -93,7 +93,7 @@ __host__ bool FileOperations::ReadFunctions::readFace(std::string& line, dynVec<
     return true;
 }
 
-__host__ bool FileOperations::ReadFunctions::ReadGroup(std::ifstream& is, dynVec<Vector3D>& vertices, dynVec<double*>& uv, 
+__host__ bool MeshRead::ReadFunctions::ReadGroup(std::ifstream& is, dynVec<Vector3D>& vertices, dynVec<double*>& uv, 
                                                         dynVec<Vector3D>& normals, dynVec<int*>& fVertices, dynVec<int*>& fNormals, 
                                                         dynVec<Vector3D>& fColors) {
     std::string line;
@@ -127,7 +127,7 @@ __host__ bool FileOperations::ReadFunctions::ReadGroup(std::ifstream& is, dynVec
     return false;
 }
         
-__host__ bool FileOperations::TargetsFromFile(const char* path, TargetList** list, Shape** shapes, const Vector3D& defaultColor) {
+__host__ bool MeshRead::TargetsFromFile(const char* path, TargetList** list, Shape** shapes, const Vector3D& defaultColor) {
     dynVec<Vector3D> vertices(1<<7);                        // Store all vertices "v"
     dynVec<Vector3D> fColors(1<<7);                         // Store colors "#"
     dynVec<double*> uv(1<<7);                               // Store uv data "vt"
@@ -190,7 +190,7 @@ __host__ bool FileOperations::TargetsFromFile(const char* path, TargetList** lis
     return true;
 }
 
-__host__ bool FileOperations::CompoundsFromFile(const char* path, Compound** list, size_t& listSize, const Vector3D& defaultColor) {
+__host__ bool MeshRead::CompoundsFromFile(const char* path, Compound** list, size_t& listSize, const Vector3D& defaultColor) {
     dynVec<Vector3D> vertices(1<<7);                        // Store all vertices "v"
     dynVec<Vector3D> fColors(1<<7);                         // Store colors "#"
     dynVec<double*> uv(1<<7);                               // Store uv data "vt"
