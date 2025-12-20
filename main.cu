@@ -22,12 +22,7 @@
 #include "meshRead.hpp"
 #include "kernelSet.hpp"
 #include "realtimeRenderf.hpp"
-
-typedef enum {
-    Single_kernel,
-    Partial_full,
-    Partial_pixel
-} KernelMode;
+#include "renderMode.hpp"
 
 
 // ################################################################
@@ -42,11 +37,6 @@ typedef enum {
 // nvcc main.cu -o main -I./dependencies/include -DSFML_STATIC -L./dependencies/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lfreetype -lwinmm -lgdi32
 
 // nvcc main.cu -o main -w -I./dependencies/include -L./dependencies/lib -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lfreetype -lwinmm -lgdi32
-
-#define SINGLE_KERNEL_RENDER FALSE
-#define KERNEL_RUNTIME_MAX_LIMIT 1.5f
-#define KERNEL_RUNTIME_MIN_LIMIT 0.5f
-#define MAXIMUM_CURANDSTATE_MEMORY 1000000000 // In bytes
 
 int main(int argc, char *argv[]) {
 
@@ -70,15 +60,15 @@ int main(int argc, char *argv[]) {
     Vector3D direction(1, 0, 0);
     Vector3D up = direction + Vector3D(0, 0, 100);
 
-    KernelMode launchMode = Partial_pixel;
+    RenderMode launchMode = RenderMode::Partial_pixel;
 
     if(argc == 2) {
         std::string mode = argv[1];
         aux::uppercase(mode);
         if(mode == "SINGLE" || "FULL") {
-            launchMode = Single_kernel;
+            launchMode = RenderMode::Single_full;
         } else if(mode == "PARTFULL" || mode == "PARTIALFULL" || mode == "PARTIALLYFULL") {
-            launchMode = Partial_full;
+            launchMode = RenderMode::Partial_full;
         }
     }
 
@@ -179,115 +169,18 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    std::chrono::system_clock::time_point start;
+    timepoint start;
     curandState *randState_d;
 
     switch(launchMode) {
-        case Single_kernel: // Full image rendered by one kernel
-            {
-            dim3 blocks(divup(width, tx), divup(height, ty));
-            dim3 threads(tx, ty);
-
-            CHECK(cudaMalloc(&randState_d, width*height*sizeof(curandState)));
-            initializeRand<<<blocks, threads>>>(randState_d, width, height);
-            CHECK(cudaDeviceSynchronize());
-            std::cout << "Random states generated" << std::endl;
-
-            std::cout << "GPU rendering started, single kernel" << std::endl;
-
-            start = std::chrono::high_resolution_clock::now();
-
-            completeRender<<<blocks, threads>>>(results, width, height, depth, samples, // TREE
-                                    tree, background_d, cudaWindow, 
-                                    randState_d);
-            CHECK(cudaDeviceSynchronize());
-            }
+        case RenderMode::Single_full: // Full image rendered by one kernel
+            Mode::FullRender(width, height, tx, ty, start, randState_d, results, depth, samples, tree, background_d, cudaWindow);
             break;
-        case Partial_full: // Set of kernels each rendering the full image, but number of samples divided evenly among the kernels
-            {
-            dim3 blocks(divup(width, tx), divup(height, ty));
-            dim3 threads(tx, ty);
-
-            CHECK(cudaMalloc(&randState_d, width*height*sizeof(curandState)));
-            initializeRand<<<blocks, threads>>>(randState_d, width, height);
-            CHECK(cudaDeviceSynchronize());
-            std::cout << "Random states generated" << std::endl;
-
-            std::cout << "GPU rendering started, partial, full figure" << std::endl;
-            std::cout << "Kernel limits: [" << float(KERNEL_RUNTIME_MIN_LIMIT) << ", " << float(KERNEL_RUNTIME_MAX_LIMIT) << "]" << std::endl;
-
-            start = std::chrono::high_resolution_clock::now();
-
-            int division = 10;
-            float part = 1.0f/division;
-
-            int i = 0, batchSize = 1;
-            while(i < samples) {
-                batchSize = std::min(samples - i, batchSize);
-                auto t0 = std::chrono::high_resolution_clock::now();
-                completeRender<<<blocks, threads>>>(results, width, height, depth, batchSize, // TREE
-                                    tree, background_d, cudaWindow, 
-                                    randState_d);
-                CHECK(cudaDeviceSynchronize());
-                i += batchSize;
-
-                auto tdiff = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - t0).count();
-                if(tdiff > KERNEL_RUNTIME_MAX_LIMIT) {
-                    batchSize = std::max(1, int(std::floor(0.99*batchSize)));
-                } else if(tdiff < KERNEL_RUNTIME_MIN_LIMIT) {
-                    batchSize = std::max(int(1.01*batchSize), batchSize+1);
-                }
-
-                while(i > part*samples) {
-                    std::cout << std::setprecision(3) << std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start).count() << " s: "
-                    << part*100.0f << " % done (batch size: " << batchSize << ")" << std::endl;
-                    part += 1.0f/division;
-                }
-            }
-            }
+        case RenderMode::Partial_full: // Set of kernels each rendering the full image, but number of samples divided evenly among the kernels
+            Mode::partialFullRender(width, height, tx, ty, start, randState_d, results, depth, samples, tree, background_d, cudaWindow);
             break;
-        case Partial_pixel: // A large set of kernels each rendering one or many pixels of the image
-            int threadsPerBlock = THREADS_PER_BLOCK;
-            int blockNum = divup(samples, threadsPerBlock);
-            int maximum_offset_length = MAXIMUM_CURANDSTATE_MEMORY/(threadsPerBlock*blockNum*sizeof(curandState));
-            int offsetLen = 1;
-            dim3 blocks(blockNum, offsetLen);
-
-            std::cout << "Allocated memory for random states: " << maximum_offset_length*threadsPerBlock*blockNum*sizeof(curandState)/1000000 << " MB" << std::endl;
-            CHECK(cudaMalloc(&randState_d, maximum_offset_length*threadsPerBlock*blockNum*sizeof(curandState)));
-            initializeRandSamples<<<dim3(blockNum, maximum_offset_length), threadsPerBlock>>>(randState_d);
-            CHECK(cudaDeviceSynchronize());
-            std::cout << "Random states generated" << std::endl;
-
-            std::cout << "GPU rendering started, partial, pixels" << std::endl;
-            std::cout << "Kernel limits: [" << float(KERNEL_RUNTIME_MIN_LIMIT) << ", " << float(KERNEL_RUNTIME_MAX_LIMIT) << "]" << std::endl;
-
-            start = std::chrono::high_resolution_clock::now();
-
-            int division = 20;
-            float part = 1.0f/division;
-            int i = 0;
-            while(i < width*height) {
-                auto t0 = std::chrono::high_resolution_clock::now();
-                renderPixels<<<blocks, threadsPerBlock>>>(results, i, width, height, depth, samples, tree, background_d, cudaWindow, randState_d);
-                CHECK(cudaDeviceSynchronize());
-                i += offsetLen;
-
-                while(i > part*width*height) {
-                    std::cout << std::setprecision(3) << std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start).count() 
-                    << " s: " << part*100.0f << " % done (offset: " << offsetLen << ")" << std::endl;
-                    part += 1.0f/division;
-                }
-
-                auto tdiff = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - t0).count();
-                if(tdiff > KERNEL_RUNTIME_MAX_LIMIT) {
-                    offsetLen = std::max(1, int(0.99*offsetLen));
-                    blocks = dim3(blockNum, offsetLen);
-                } else if(tdiff < KERNEL_RUNTIME_MIN_LIMIT) {
-                    offsetLen = std::min(int(maximum_offset_length), int(std::ceil(1.01f*offsetLen)));
-                    blocks = dim3(blockNum, offsetLen);
-                }
-            }
+        case RenderMode::Partial_pixel: // A large set of kernels each rendering one or many pixels of the image
+            Mode::partialPixelRender(width, height, tx, ty, start, randState_d, results, depth, samples, tree, background_d, cudaWindow);
             break;
     }
 
