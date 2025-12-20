@@ -16,7 +16,6 @@
 #include "targetList.hpp"
 #include "geometria.hpp"
 #include "cameraf.hpp"
-#include "logMethods.hpp"
 #include "image.hpp"
 #include "BVHf.hpp"
 #include "meshRead.hpp"
@@ -60,15 +59,17 @@ int main(int argc, char *argv[]) {
     Vector3D direction(1, 0, 0);
     Vector3D up = direction + Vector3D(0, 0, 100);
 
-    RenderMode launchMode = RenderMode::Partial_pixel;
+    RenderMode launchMode = RenderMode::Single_full;
 
     if(argc == 2) {
         std::string mode = argv[1];
         aux::uppercase(mode);
-        if(mode == "SINGLE" || "FULL") {
+        if(mode == "SINGLE" || mode == "FULL") {
             launchMode = RenderMode::Single_full;
         } else if(mode == "PARTFULL" || mode == "PARTIALFULL" || mode == "PARTIALLYFULL") {
             launchMode = RenderMode::Partial_full;
+        } else if(mode == "PARTIALPIXEL" || mode == "PIXEL") {
+            launchMode = RenderMode::Partial_pixel;
         }
     }
 
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]) {
     std::cout << termcolor::yellow <<
     "#################################\n"
     "#        Ray tracer (GPU)       #\n"
-    "# Date: " << getDate() << " #\n"
+    "# Date: " << aux::getDate() << " #\n"
     "#################################" 
     << termcolor::reset << std::endl;
 
@@ -112,9 +113,9 @@ int main(int argc, char *argv[]) {
 
     int pixelCount = width*height;
 
-    std::string backupBinPath(getRawDate() + "_" + getImageDimensions(width, height) 
+    std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
                             + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.bin");
-    std::string backupTextPath = "" + getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
+    std::string backupTextPath = "" + aux::getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
                             + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.txt";
 
     WindowVectors *cudaWindow = NULL;
@@ -188,7 +189,7 @@ int main(int argc, char *argv[]) {
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    std::cout << "Rendertime: " << getDuration(duration) << std::endl;
+    std::cout << "Rendertime: " << aux::getDuration(duration) << std::endl;
 
     sf::Uint8* pixels = new sf::Uint8[width*height*4];
 

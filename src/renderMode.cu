@@ -35,6 +35,8 @@ void Mode::partialFullRender(int width, int height, int tx, int ty, timepoint& s
     std::cout << "GPU rendering started, partial, full figure" << std::endl;
     std::cout << "Kernel limits: [" << float(KERNEL_RUNTIME_MIN_LIMIT) << ", " << float(KERNEL_RUNTIME_MAX_LIMIT) << "]" << std::endl;
 
+    start = std::chrono::high_resolution_clock::now();
+
     int division = 10;
     float part = 1.0f/division;
 

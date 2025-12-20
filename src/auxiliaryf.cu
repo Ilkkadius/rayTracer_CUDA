@@ -41,3 +41,76 @@ __host__ bool aux::stringToInt(const std::string& str, int& num) {
     num = t;
     return true;
 }
+
+std::string zero2front(int a)
+{
+    return a >= 10 ? "" : "0";
+}
+
+std::string aux::getDate() {
+    auto t = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(t);
+    tm* timeInfo = localtime(&tt);
+    char buffer[24];
+    const std::string format = "%e. %h. %Y: %T";
+    strftime(buffer, sizeof(buffer), format.c_str(), timeInfo);
+    return std::string(buffer);
+}
+
+int aux::getMonthNumber(const std::string& month) {
+    if(month[2] == 'n') {
+        return (month[1] == 'a' ? 1 : 6);
+    } else if(month[2] == 'b') {
+        return 2;
+    } else if(month[2] == 'r') {
+        return (month[0] == 'M' ? 3 : 4);
+    } else if(month[2] == 'y') {
+        return 5;
+    } else if(month[2] == 'l') {
+        return 7;
+    } else if(month[2] == 'g') {
+        return 8;
+    } else if(month[2] == 'p') {
+        return 9;
+    } else if(month[2] == 't') {
+        return 10;
+    } else if(month[2] == 'v') {
+        return 11;
+    } else {
+        return 12;
+    }
+}
+
+std::string aux::getRawDate() {
+    auto t = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(t);
+    tm* timeInfo = localtime(&tt);
+    char buffer[13];
+    const std::string format = "%y%m%d_%H%M";
+    strftime(buffer, sizeof(buffer), format.c_str(), timeInfo);
+    return std::string(buffer);
+}
+
+std::string aux::getRawDuration(double duration, int precision) {
+    std::stringstream ss;
+    int minutes = 0;
+    if(duration > 60) {
+        minutes = duration / 60;
+        ss << minutes << "min";
+    }
+    ss << std::fixed << std::setprecision(precision) << duration - 60.0 * minutes << "s";
+    return ss.str();
+}
+
+std::string aux::getDuration(double duration) {
+    int minutes = 0;
+    std::stringstream runtime;
+    if (duration > 60.0)
+    {
+        minutes = duration / 60;
+        runtime << minutes << " minutes ";
+    }
+    runtime << duration - 60.0 * minutes << " seconds.";
+    return runtime.str();
+}
+

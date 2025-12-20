@@ -6,6 +6,9 @@
 
 #include <chrono>
 #include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #include "vector3D.hpp"
 
@@ -58,6 +61,27 @@ namespace aux{
 
     __host__ void uppercase(std::string& s);
     __host__ bool stringToInt(const std::string& str, int& num);
+
+    std::string zero2front(int a);
+
+    /**
+     * @brief e.g. 1. Jan. 2023: 20:30:15
+     */
+    std::string getDate();
+
+    int getMonthNumber(const std::string& month);
+
+    /**
+     * @brief e.g. 231231_2359
+     */
+    std::string getRawDate();
+
+    /**
+     * @brief e.g. 7min34s
+     */
+    std::string getRawDuration(double duration, int precision = 2);
+
+    std::string getDuration(double duration);
 
 }
 
