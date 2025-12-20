@@ -1,14 +1,5 @@
 #include "renderMode.hpp"
 
-#include <iostream>
-#include <iomanip>
-
-#include <cuda_runtime.h>
-#include <curand_kernel.h>
-
-#include "auxiliaryf.hpp"
-#include "kernelSet.hpp"
-
 void Mode::FullRender(int width, int height, int tx, int ty, timepoint& start, curandState* randState_d, Vector3D* results, 
                 int depth, int samples, BVHTree** tree, BackgroundColor** background_d, WindowVectors* cudaWindow) {
     dim3 blocks(divup(width, tx), divup(height, ty));
