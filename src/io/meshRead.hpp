@@ -14,7 +14,7 @@
 
 // NB: .obj file indexing starts from 1
 
-namespace FileOperations{
+namespace MeshRead{
 
     /**
      * @brief Auxiliary functions not to be used outside FileOperations

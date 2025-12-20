@@ -19,7 +19,7 @@
 #include "logMethods.hpp"
 #include "imageBackupf.hpp"
 #include "BVHf.hpp"
-#include "fileOperations.hpp"
+#include "meshRead.hpp"
 #include "kernelSet.hpp"
 #include "realtimeRenderf.hpp"
 
@@ -149,14 +149,14 @@ int main(int argc, char *argv[]) {
     CHECK(cudaDeviceSynchronize());
     
     if(fileRead) {
-        FileOperations::TargetsFromFile("teapot.obj", list, shapes);
+        MeshRead::TargetsFromFile("teapot.obj", list, shapes);
         CHECK(cudaDeviceSynchronize());
     }
 
     Compound** compounds; size_t compoundCount;
     CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
     CHECK(cudaDeviceSynchronize());
-    //FileOperations::CompoundsFromFile("teapot.obj", compounds, compoundCount);
+    //MeshRead::CompoundsFromFile("teapot.obj", compounds, compoundCount);
     //addCompoundsToTargetlist<<<1,1>>>(compounds, 1, list, shapes);
     
     BVHTree** tree;
