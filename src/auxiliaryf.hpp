@@ -4,6 +4,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
+#include <chrono>
 #include <algorithm>
 
 #include "vector3D.hpp"
@@ -12,11 +13,16 @@
 
 
 #define THREADS_PER_BLOCK int(512)
+#define SINGLE_KERNEL_RENDER FALSE
+#define KERNEL_RUNTIME_MAX_LIMIT 1.5f
+#define KERNEL_RUNTIME_MIN_LIMIT 0.5f
+#define MAXIMUM_CURANDSTATE_MEMORY 1000000000 // In bytes
 
 
 static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will occur
 static constexpr float phi = 1.61803f;
 typedef unsigned int uint;
+typedef std::chrono::system_clock::time_point timepoint;
 
 #define CHECK_FUNC
 static inline void check(cudaError_t err, const char* context) {
