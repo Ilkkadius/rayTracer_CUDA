@@ -13,7 +13,7 @@
 class BackgroundColor{
 public:
     __device__ virtual Vector3D colorize(const Ray& ray) const {
-        return Vector3D();
+        return Vector3D(0.0f,0.0f,0.0f);
     }
 };
 

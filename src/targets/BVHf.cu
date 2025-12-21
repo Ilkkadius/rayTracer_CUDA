@@ -28,7 +28,7 @@ __device__ float Node::getsHit(const Ray& ray) const {
 __device__ BVHTree::BVHTree(TargetList** listptr) : nodeCount(0), targetCount(0) {
     targetCount = (*listptr)->size;
     if(targetCount < 1) {
-        printf("ERROR: BVH targetCount must be at least one.\n");
+        targets = NULL; return;
     }
     targets = (*listptr)->targets;
     tIdx = new uint[targetCount];
@@ -49,6 +49,7 @@ __device__ BVHTree::BVHTree(TargetList** listptr) : nodeCount(0), targetCount(0)
 }
 
 __device__ void BVHTree::findCollision(const Ray& ray, HitInfo& hit) const {
+    if(targets == NULL) return;
     Node* stack[100];
     uint stackPtr = 0;
     Node* node = nodes;
