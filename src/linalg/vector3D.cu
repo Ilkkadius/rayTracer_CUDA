@@ -80,7 +80,7 @@ __host__ __device__ float& Vector3D::operator[](int i) {
 
 
 __host__ std::ostream& operator<<(std::ostream& os, const Vector3D& vec) {
-    os << "(" << vec.x << "; " << vec.y << "; " << vec.z << ")";
+    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return os;
 }
 
