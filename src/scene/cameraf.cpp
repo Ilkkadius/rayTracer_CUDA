@@ -59,5 +59,6 @@ __host__ void Camera::check() {
 
 
 __host__ void Camera::initializeWindow() {
+    direction = unitVec(direction); up = unitVec(up);
     window = initialRays(eye, direction, 1.0f, up, height, width, windowHeight);
 }
