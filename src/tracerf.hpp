@@ -18,7 +18,7 @@ __device__ HitInfo closestHit(const Ray& ray, TargetList* listptr);
 __device__ HitInfo closestHit(const Ray& ray, BVHTree* tree);
 
 template <class Tptr>
-__device__ Vector3D Trace(const Ray& ray, Tptr targetHolder, BackgroundColor* background, int depth, curandState* randState) {
+__device__ Vector3D Trace(const Ray& ray, Tptr* targetHolder, BackgroundColor* background, int depth, curandState* randState) {
     Ray current = ray;
     Vector3D rayColor(1.0f, 1.0f, 1.0f);
     HitInfo info;
@@ -47,7 +47,7 @@ __device__ Vector3D Trace(const Ray& ray, Tptr targetHolder, BackgroundColor* ba
 }
 
 template <class Tptr>
-__device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, Tptr targetHolder, 
+__device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, Tptr* targetHolder, 
                         int depth, int samples, BackgroundColor* background, curandState* randState) {
     Vector3D color(0.0f,0.0f,0.0f);
     int k = 0;
