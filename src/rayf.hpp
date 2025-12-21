@@ -29,8 +29,6 @@ class WindowVectors{
 public:
     __host__ __device__ WindowVectors(Vector3D starter, Vector3D eye, Vector3D xVec, Vector3D yVec);
 
-    __host__ __device__ WindowVectors(const WindowVectors& window);
-
     Vector3D starter_, eye_, xVec_, yVec_;
 };
 
