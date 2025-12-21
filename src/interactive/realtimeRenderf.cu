@@ -165,7 +165,6 @@ __host__ void realtimeRender::startCamera(Camera& cam, TargetList** targetPtr, B
     CHECK(cudaMallocManaged(&pixels, camCpy.width * camCpy.height * 4));
     CHECK(cudaDeviceSynchronize());
 
-    sf::Event event;
     sf::Sprite sprite;
 
     sf::RenderWindow window(sf::VideoMode(camCpy.width, camCpy.height), "RenderWindow_Frame0", sf::Style::Titlebar | sf::Style::Close);
@@ -273,7 +272,6 @@ __host__ void realtimeRender::startCamera(Camera& cam, BVHTree** tree, Backgroun
     CHECK(cudaMallocManaged(&pixels, camCpy.width * camCpy.height * 4));
     CHECK(cudaDeviceSynchronize());
 
-    sf::Event event;
     sf::Sprite sprite;
 
     sf::RenderWindow window(sf::VideoMode(camCpy.width, camCpy.height), "RenderWindow_Frame0", sf::Style::Titlebar | sf::Style::Close);
