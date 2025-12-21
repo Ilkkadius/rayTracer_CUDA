@@ -73,7 +73,7 @@ namespace aux{
     int getMonthNumber(const std::string& month);
 
     /**
-     * @brief e.g. 231231_2359
+     * @brief e.g. 231231_235932
      */
     std::string getRawDate();
 
