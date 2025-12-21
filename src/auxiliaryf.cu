@@ -85,7 +85,7 @@ std::string aux::getRawDate() {
     auto t = std::chrono::system_clock::now();
     time_t tt = std::chrono::system_clock::to_time_t(t);
     tm* timeInfo = localtime(&tt);
-    char buffer[13];
+    char buffer[15];
     const std::string format = "%y%m%d_%H%M%S";
     strftime(buffer, sizeof(buffer), format.c_str(), timeInfo);
     return std::string(buffer);
