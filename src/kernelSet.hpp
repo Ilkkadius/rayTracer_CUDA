@@ -12,21 +12,30 @@
 #include "vector3D.hpp"
 #include "BVHf.hpp"
 
-__global__ void completeRender(sf::Uint8 *pixels, 
-    int width, int height, 
-    int depth, int samples,
-    TargetList** list,
-    BackgroundColor** background, 
-    WindowVectors* window, 
-    curandState* randState);
+template <class Tptr>
+__global__ void completeRender(sf::Uint8 *pixels,
+        int width, int height, 
+        int depth, int samples,
+        Tptr** targetHolder,  // BVHTree** or TargetList**
+        BackgroundColor** background,
+        WindowVectors* window, 
+        curandState* randState) {
+        
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    if(i >= width || j >= height) return;
 
-__global__ void completeRender(sf::Uint8 *pixels, 
-    int width, int height, 
-    int depth, int samples,
-    BVHTree** tree,
-    BackgroundColor** background, 
-    WindowVectors* window, 
-    curandState* randState);
+    int idx = width * j + i;
+
+    Vector3D color = 255.0f/samples * TracePixelRnd(window, i, j, *targetHolder, depth, samples, *background, randState + idx);
+
+    idx = idx << 2;
+    
+    pixels[idx] = color.x;
+    pixels[idx + 1] = color.y;
+    pixels[idx + 2] = color.z;
+    pixels[idx + 3] = 255;
+}
 
 /**
  * @brief Calculates pixel values and adds them to pixels
@@ -98,24 +107,6 @@ __global__ void RealTimeUpdateRender(sf::Uint8 *pixels,
     BackgroundColor** background, 
     WindowVectors* window, 
     curandState* randState, double* darray, float frameIdx);
-
-
-__global__ void renderHalf(sf::Uint8 *pixels, 
-    int width, int height, 
-    int depth, int samples,
-    TargetList** list,
-    BackgroundColor** background, 
-    WindowVectors* window, 
-    curandState* randState, bool left);
-
-
-__global__ void renderQuarter(sf::Uint8 *pixels, 
-    int width, int height, 
-    int depth, int samples,
-    TargetList** list,
-    BackgroundColor** background, 
-    WindowVectors* window, 
-    curandState* randState, int quarter);
 
 // ###############################################
 // # INITIALIZATION & MEMORY RELEASE
