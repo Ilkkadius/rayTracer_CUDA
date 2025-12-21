@@ -18,6 +18,8 @@ __global__ void completeRender(sf::Uint8 *pixels,
 
     Vector3D color = 255.0f * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
     
+    randState[idx] = rand;
+
     idx = idx << 2;
     
     pixels[idx] = color.x;
@@ -42,6 +44,8 @@ __global__ void completeRender(sf::Uint8 *pixels,
     curandState rand = randState[idx];
 
     Vector3D color = 255.0f * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
+
+    randState[idx] = rand;
 
     idx = idx << 2;
     
@@ -93,6 +97,8 @@ __global__ void renderPixel(Vector3D* color,
         threadSum = threadSum + TracePixelRnd(window, x, y, *tree, depth, *background, rand);
     }
     sharedData[threadIdx.x] = threadSum;
+
+    randState[threadIdx.x] = rand;
 
     __syncthreads();
 
@@ -177,6 +183,8 @@ __global__ void RealTimeRender(sf::Uint8 *pixels,
 
     Vector3D color = 255 * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
 
+    randState[idx] = rand;
+
     int pidx = idx << 2;
     
     pixels[pidx] = color.x;
@@ -207,6 +215,8 @@ __global__ void RealTimeUpdateRender(sf::Uint8 *pixels,
     curandState rand = randState[idx];
 
     Vector3D color = 255 * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
+
+    randState[idx] = rand;
 
     int didx = 3*idx;
 
@@ -247,6 +257,8 @@ __global__ void renderHalf(sf::Uint8 *pixels,
     curandState rand = randState[idx];
 
     Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
+
+    randState[idx] = rand;
     
     idx = idx << 2;
     
@@ -289,6 +301,8 @@ __global__ void renderQuarter(sf::Uint8 *pixels,
 
     Vector3D color = 255 * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
     
+    randState[idx] = rand;
+
     idx = idx << 2;
     
     pixels[idx] = color.x;
