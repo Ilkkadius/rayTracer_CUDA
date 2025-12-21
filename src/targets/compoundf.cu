@@ -8,7 +8,7 @@ __device__ Compound::Compound(size_t N) : capacity(N), size(0) {
 }
 
 __device__ Vector3D Compound::centroid() const {
-    Vector3D center;
+    Vector3D center(0.0f,0.0f,0.0f);
     for(int i = 0; i < size; i++) {
         center += targets[i]->centroid();
     }

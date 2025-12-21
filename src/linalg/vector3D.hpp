@@ -10,7 +10,10 @@ public:
     float x, y, z;
 
     // Default constructor
-    __host__ __device__ Vector3D() : x(0.0f), y(0.0f), z(0.0f) {}
+
+    __device__ Vector3D() {};
+
+    //__host__ __device__ Vector3D() : x(0.0f), y(0.0f), z(0.0f) {}
 
     // Constructor
     __host__ __device__ Vector3D(float X, float Y, float Z) : x(X), y(Y), z(Z) {}
