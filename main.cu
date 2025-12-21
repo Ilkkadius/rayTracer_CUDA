@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     int tx = 8, ty = 8;
     bool backup = false;
     bool realTime = false;
-    bool fileRead = true;
+    bool fileRead = false;
 
     cam.setFOV(80.0f);
 
@@ -60,14 +60,14 @@ int main(int argc, char *argv[]) {
 
     RenderMode launchMode = RenderMode::Single_full;
 
-    if(argc == 2) {
+    if(argc >= 2) {
         std::string mode = argv[1];
         aux::uppercase(mode);
         if(mode == "SINGLE" || mode == "FULL") {
             launchMode = RenderMode::Single_full;
         } else if(mode == "PARTFULL" || mode == "PARTIALFULL" || mode == "PARTIALLYFULL") {
             launchMode = RenderMode::Partial_full;
-        } else if(mode == "PARTIALPIXEL" || mode == "PIXEL") {
+        } else if(mode == "PARTIALPIXEL" || mode == "PIXEL" || mode == "PIXELS") {
             launchMode = RenderMode::Partial_pixel;
         }
     }
@@ -112,8 +112,6 @@ int main(int argc, char *argv[]) {
 
     cudaDeviceSetLimit(cudaLimitStackSize, 4096);
 
-    int pixelCount = width*height;
-
     std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
                             + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.bin");
     std::string backupTextPath = "" + aux::getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
@@ -144,9 +142,10 @@ int main(int argc, char *argv[]) {
         CHECK(cudaDeviceSynchronize());
     }
 
-    Compound** compounds; size_t compoundCount;
+    Compound** compounds;
     CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
     CHECK(cudaDeviceSynchronize());
+    //size_t compoundCount;
     //MeshRead::CompoundsFromFile("teapot.obj", compounds, compoundCount);
     //addCompoundsToTargetlist<<<1,1>>>(compounds, 1, list, shapes);
     
