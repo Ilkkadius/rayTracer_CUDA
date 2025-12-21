@@ -72,7 +72,7 @@ __device__ Vector3D Trace(const Ray& ray, BVHTree* tree, BackgroundColor* backgr
 
 __device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, TargetList** listptr, 
                         int depth, int samples, BackgroundColor* background, curandState& randState) {
-    Vector3D color;
+    Vector3D color(0.0f,0.0f,0.0f);
     int k = 0;
     Vector3D start = window->starter_, xdiff = window->xVec_, ydiff = window->yVec_, eye = window->eye_;
     while(k < samples) {
@@ -92,7 +92,7 @@ __device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, TargetLis
 
 __device__ Vector3D TracePixelRnd(WindowVectors* window, int x, int y, BVHTree* tree, 
                         int depth, int samples, BackgroundColor* background, curandState& randState) {
-    Vector3D color;
+    Vector3D color(0.0f,0.0f,0.0f);
     int k = 0;
     Vector3D start = window->starter_, xdiff = window->xVec_, ydiff = window->yVec_, eye = window->eye_;
     while(k < samples) {
