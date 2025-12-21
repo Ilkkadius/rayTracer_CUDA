@@ -3,20 +3,18 @@
 
 #include "vector3D.hpp"
 #include "rayf.hpp"
-#include "targetf.hpp"
-
+#include "target.hpp"
 
 class HitInfo{
 public:
-    Vector3D point, normal, rayDir;
+    Vector3D normal;
+    Vector3D color;
+    float emission;
     float t;
-    Target* target;
+    
+    __device__ HitInfo() : normal(Vector3D()), color(Vector3D(1.0f,1.0f,1.0f)), emission(0.0f), t(-1.0f) {}
 
-    __device__ HitInfo();
-
-    __device__ HitInfo(const Vector3D& rayDirection, const Vector3D& hitPoint, 
-                        const Vector3D& surfaceNormal, float t_, Target* target_);
-
+    __device__ HitInfo(const Vector3D& normal_, const Vector3D& color_, float emission_, float t_) : normal(normal_), color(color_), emission(emission_), t(t_) {}
 };
 
 #endif

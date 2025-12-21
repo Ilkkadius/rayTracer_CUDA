@@ -14,7 +14,6 @@
 #include "backgroundsf.hpp"
 #include "auxiliaryf.hpp"
 #include "targetList.hpp"
-#include "geometria.hpp"
 #include "cameraf.hpp"
 #include "image.hpp"
 #include "BVHf.hpp"
@@ -51,7 +50,7 @@ int main(int argc, char *argv[]) {
     int tx = 8, ty = 8;
     bool backup = false;
     bool realTime = false;
-    bool fileRead = false;
+    bool fileRead = true;
 
     cam.setFOV(80.0f);
 
@@ -111,6 +110,8 @@ int main(int argc, char *argv[]) {
 
     cam.check();
 
+    cudaDeviceSetLimit(cudaLimitStackSize, 4096);
+
     int pixelCount = width*height;
 
     std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
@@ -132,15 +133,14 @@ int main(int argc, char *argv[]) {
     CHECK(cudaDeviceSynchronize());
     std::cout << "Background ready" << std::endl;
 
-    TargetList** list; Target** targets; Shape** shapes; int N = 2000;
+    TargetList** list; Target** targets; int N = int(MAXIMUM_TARGET_COUNT);
     CHECK(cudaMalloc(&list, sizeof(TargetList*)));
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
-    CHECK(cudaMalloc(&shapes, N*sizeof(Shape*)));
-    initializeTargets<<<1,1>>>(targets, list, shapes, N);
+    initializeTargets<<<1,1>>>(targets, list, N);
     CHECK(cudaDeviceSynchronize());
     
     if(fileRead) {
-        MeshRead::TargetsFromFile("teapot.obj", list, shapes);
+        MeshRead::TargetsFromFile("teapot.obj", list);
         CHECK(cudaDeviceSynchronize());
     }
 
@@ -226,11 +226,10 @@ int main(int argc, char *argv[]) {
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaFree(background_d));
 
-    releaseTargets<<<1,1>>>(targets, list, shapes);
+    releaseTargets<<<1,1>>>(targets, list);
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaFree(targets));
     CHECK(cudaFree(list));
-    CHECK(cudaFree(shapes));
 
     cudaDeviceReset();
 

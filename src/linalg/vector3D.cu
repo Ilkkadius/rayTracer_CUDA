@@ -136,3 +136,4 @@ __host__ __device__ Vector3D maxVector(const Vector3D& vec1, const Vector3D& vec
     float z = vec1.z > vec2.z ? vec1.z : vec2.z;
     return Vector3D(x, y, z);
 }
+

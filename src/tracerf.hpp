@@ -17,7 +17,7 @@ __device__ HitInfo closestHit(const Ray& ray, TargetList* listptr);
 
 __device__ HitInfo closestHit(const Ray& ray, BVHTree* tree);
 
-__device__ Vector3D Trace(const Ray& ray, TargetList** listptr, BackgroundColor* background, int depth, curandState randState);
+__device__ Vector3D Trace(const Ray& ray, TargetList** listptr, BackgroundColor* background, int depth, curandState& randState);
 
 __device__ Vector3D Trace(const Ray& ray, BVHTree* tree, BackgroundColor* background, int depth, curandState& randState);
 

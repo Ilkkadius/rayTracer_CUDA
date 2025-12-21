@@ -45,6 +45,7 @@ __device__ Matrix generateRotation(float a, char c);
  */
 __host__ __device__ Matrix generateRotation(float a, const Vector3D& axis);
 
+__device__ Vector3D rotateVec(const Vector3D& vec, double angle, const Vector3D& axis, const Vector3D& axisPos);
 
 
 #endif

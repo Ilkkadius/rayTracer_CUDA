@@ -20,6 +20,7 @@
 #define KERNEL_RUNTIME_MAX_LIMIT 1.5f
 #define KERNEL_RUNTIME_MIN_LIMIT 0.5f
 #define MAXIMUM_CURANDSTATE_MEMORY 1000000000 // In bytes
+#define MAXIMUM_TARGET_COUNT 2000
 
 
 static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will occur

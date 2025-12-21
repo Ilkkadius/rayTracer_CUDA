@@ -15,17 +15,17 @@
 
 
 
-__device__ void init::createTargets(Target** targets, TargetList** list, Shape** shapes, int capacity) {
+__device__ void init::createTargets(TargetList** list, int capacity) {
     int N = capacity;
     switch(1) {
         case 1:
-            Scene::Platon(list, targets, shapes, N);
+            Scene::Platon(*list, N);
             break;
         case 2:
-            Scene::testScene(list, targets, shapes, N);
+            Scene::testScene(*list, N);
             break;
         default:
-            Scene::empty(list, targets, shapes, N);
+            Scene::empty(*list, N);
             break;
     }
 }

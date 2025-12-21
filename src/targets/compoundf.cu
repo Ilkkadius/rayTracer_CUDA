@@ -2,6 +2,9 @@
 
 __device__ Compound::Compound(size_t N) : capacity(N), size(0) {
     targets = new Target*[N];
+    if(targets == NULL) {
+        printf("ERROR: Compound constructor failed to allocate memory.\n");
+    }
 }
 
 __device__ Vector3D Compound::centroid() const {
@@ -38,9 +41,9 @@ __device__ void Compound::rotate(float angle, const Vector3D& axis) {
 
 
 __device__ void Compound::release() {
+    if(targets == NULL) return;
     for(size_t i = 0; i < capacity; i++) {
         if(targets[i]) {
-            delete targets[i]->shape;
             delete targets[i];
             targets[i] = NULL;
         }
@@ -52,12 +55,10 @@ __device__ void Compound::release() {
 }
 
 
-__device__ void Compound::copyToList(TargetList* list, Shape** shapes) {
+__device__ void Compound::copyToList(TargetList* list) {
     for(int i = 0; i < size; i++) {
         if(list->size < list->capacity) {
-            list->targets[list->size] = targets[i];
-            shapes[list->size] = targets[i]->shape;
-            list->size++;
+            list->targets[list->size++] = targets[i];
             targets[i] = NULL;
         }
     }
@@ -67,8 +68,7 @@ __device__ void Compound::copyToList(TargetList* list, Shape** shapes) {
 __device__ void Compound::mergeCompound(Compound& c) {
     for(int i = 0; i < c.size; i++) {
         if(size < capacity) {
-            targets[size] = c.targets[i];
-            size++;
+            targets[size++] = c.targets[i];
             c.targets[i] = NULL;
         }
     }
@@ -76,30 +76,18 @@ __device__ void Compound::mergeCompound(Compound& c) {
 }
 
 __device__ bool Compound::add(Target* target) {
+    if(targets == NULL) {
+        if(target) delete target;
+        return false;
+    }
     if(size < capacity) {
-        targets[size] = target;
-        size++;
+        targets[size++] = target;
         return true;
     } else {
-        delete target->shape;
         delete target;
         return false;
     }
 }
-
-
-__device__ compoundTest::compoundTest() : Compound(1) {
-    generator();
-}
-
-
-__device__ void compoundTest::generator() {
-    Sphere* S = new Sphere(Vector3D(6, -0.5, 2), 0.5f);
-    Target* T = new Target(S, Vector3D(1,0.2,0.2));
-    add(T);
-}
-
-
 
 __device__ Tetrahedron::Tetrahedron(const Vector3D& center, float radius, const Vector3D& color)
             : Compound(4) {
@@ -118,8 +106,7 @@ __device__ void Tetrahedron::makeTetrahedron(const Vector3D& center, float radiu
 
     for(int i = 0; i < 4; i++) {
         int v1 = faces[i][0], v2 = faces[i][1], v3 = faces[i][2];
-        Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
-        add(new Target(T, color));
+        add(new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center, color));
     }
 }
 
@@ -154,8 +141,7 @@ __device__ void Icosahedron::makeIcosahedron(const Vector3D& center, float radiu
     
     for(int i = 0; i < 20; i++) {
         int v1 = facePermutations[i][0], v2 = facePermutations[i][1], v3 = facePermutations[i][2];
-        Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
-        add(new Target(T, color));
+        add(new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center, color));
     }
 }
 
@@ -164,10 +150,9 @@ __device__ Pentagon::Pentagon(const Vector3D& v1, const Vector3D& v2, const Vect
 
 
 __device__ void Pentagon::makePentagon(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3, const Vector3D& v4, const Vector3D& v5, const Vector3D& color) {
-    Triangle* T1 = new Triangle(v1, v2, v3);
-    Triangle* T2 = new Triangle(v1, v3, v4);
-    Triangle* T3 = new Triangle(v1, v4, v5);
-    add(new Target(T1, color)); add(new Target(T2, color)); add(new Target(T3, color));
+    add(new Triangle(v1, v2, v3, color)); 
+    add(new Triangle(v1, v3, v4, color)); 
+    add(new Triangle(v1, v4, v5, color));
 }
 
 __device__ Dodecahedron::Dodecahedron(const Vector3D& center, float radius, const Vector3D& color)
@@ -222,8 +207,7 @@ __device__ void Octahedron::makeOctahedron(const Vector3D& center, float radius,
 
     for(int i = 0; i < 8; i++) {
         int v1 = faces[i][0], v2 = faces[i][1], v3 = faces[i][2];
-        Triangle* T = new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center);
-        add(new Target(T, color));
+        add(new Triangle(R*vertices[v1] + center, R*vertices[v2] + center, R*vertices[v3] + center, color));
     }
 }
 
@@ -244,8 +228,7 @@ __device__ void Cube::buildCube(const Vector3D& center, float radius, const Vect
 
     for(int i = 0; i < 6; i++) {
         Vector3D q0 = R*v[f[i][0]] + center, q1 = R*v[f[i][1]] + center, q2 = R*v[f[i][2]] + center, q3 = R*v[f[i][3]] + center;
-        Triangle* T1 = new Triangle(q0, q1, q2);
-        Triangle* T2 = new Triangle(q2, q3, q0);
-        add(new Target(T1, color)); add(new Target(T2, color));
+        add(new Triangle(q0, q1, q2, color)); 
+        add(new Triangle(q2, q3, q0, color));
     }
 }

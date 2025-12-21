@@ -1,7 +1,6 @@
 #include "BVHf.hpp"
 
 
-
 __device__ float Node::getsHit(const Ray& ray) const {
     Vector3D tmins, tmaxs;
     for(int i = 0; i < 3; i++) {
@@ -53,15 +52,12 @@ __device__ void BVHTree::findCollision(const Ray& ray, HitInfo& hit) const {
     Node* stack[100];
     uint stackPtr = 0;
     Node* node = nodes;
+    HitInfo tempHit;
     while(1) {
         if(node->targetCount > 0) {
             for(int i = 0; i < node->targetCount; i++) {
-                Target* obj = targets[tIdx[node->first + i]];
-                float t = obj->collision(ray);
-                if(t > epsilon) {
-                    if(hit.t > t || hit.t < 0.0f) {
-                        hit = HitInfo(ray.dir, ray.at(t), obj->normal(ray.at(t)), t, obj);
-                    }
+                if(targets[tIdx[node->first + i]]->rayCollision(ray, &tempHit) && ( hit.t < 0.0f || (tempHit.t > epsilon && tempHit.t < hit.t))) {
+                    hit = tempHit;
                 }
             }
             if(stackPtr == 0) break;

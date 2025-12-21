@@ -127,7 +127,7 @@ __host__ bool MeshRead::ReadFunctions::ReadGroup(std::ifstream& is, dynVec<Vecto
     return false;
 }
         
-__host__ bool MeshRead::TargetsFromFile(const char* path, TargetList** list, Shape** shapes, const Vector3D& defaultColor) {
+__host__ bool MeshRead::TargetsFromFile(const char* path, TargetList** list, const Vector3D& defaultColor) {
     dynVec<Vector3D> vertices(1<<7);                        // Store all vertices "v"
     dynVec<Vector3D> fColors(1<<7);                         // Store colors "#"
     dynVec<double*> uv(1<<7);                               // Store uv data "vt"
@@ -166,7 +166,7 @@ __host__ bool MeshRead::TargetsFromFile(const char* path, TargetList** list, Sha
     CHECK(cudaMallocManaged(&defCol, sizeof(Vector3D)));
     *defCol = defaultColor;
 
-    generateTargets<<<1, 1>>>(list, shapes, verts, fVerts, fCols, fVertices.size(), defCol);
+    generateTargets<<<1, 1>>>(list, verts, fVerts, fCols, fVertices.size(), defCol);
     CHECK(cudaDeviceSynchronize());
 
     if(is.is_open()) {
