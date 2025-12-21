@@ -6,7 +6,7 @@ void Mode::FullRender(int width, int height, int tx, int ty, timepoint& start, c
     dim3 threads(tx, ty);
 
     CHECK(cudaMalloc(randState_ptr, width*height*sizeof(curandState)));
-    initializeRand<<<blocks, threads>>>(*randState_ptr, width, height);
+    initializeRand<<<blocks, threads>>>(*randState_ptr, width, height, int(time(0)));
     CHECK(cudaDeviceSynchronize());
     std::cout << "Random states generated" << std::endl;
 
@@ -28,7 +28,7 @@ void Mode::partialFullRender(int width, int height, int tx, int ty, timepoint& s
     dim3 threads(tx, ty);
 
     CHECK(cudaMalloc(randState_ptr, width*height*sizeof(curandState)));
-    initializeRand<<<blocks, threads>>>(*randState_ptr, width, height);
+    initializeRand<<<blocks, threads>>>(*randState_ptr, width, height, int(time(0)));
     CHECK(cudaDeviceSynchronize());
     std::cout << "Random states generated" << std::endl;
 
@@ -70,13 +70,13 @@ void Mode::partialPixelRender(int width, int height, int tx, int ty, timepoint& 
                 int depth, int samples, BVHTree** tree, BackgroundColor** background_d, WindowVectors* cudaWindow) {
     int threadsPerBlock = THREADS_PER_BLOCK;
     int blockNum = divup(samples, threadsPerBlock);
-    int maximum_offset_length = MAXIMUM_CURANDSTATE_MEMORY/(threadsPerBlock*blockNum*sizeof(curandState));
+    int maximum_offset_length = PIXELRENDER_MAXIMUM_OFFSET;
     int offsetLen = 1;
     dim3 blocks(blockNum, offsetLen);
 
-    std::cout << "Allocated memory for random states: " << maximum_offset_length*threadsPerBlock*blockNum*sizeof(curandState)/1000000 << " MB" << std::endl;
+    std::cout << "Allocated memory for random states: " << maximum_offset_length*threadsPerBlock*blockNum*sizeof(curandState)/1000000.0f << " MB" << std::endl;
     CHECK(cudaMalloc(randState_ptr, maximum_offset_length*threadsPerBlock*blockNum*sizeof(curandState)));
-    initializeRandSamples<<<dim3(blockNum, maximum_offset_length), threadsPerBlock>>>(*randState_ptr);
+    initializeRandSamples<<<dim3(blockNum, maximum_offset_length), threadsPerBlock>>>(*randState_ptr,int(time(0)));
     CHECK(cudaDeviceSynchronize());
     std::cout << "Random states generated" << std::endl;
 
