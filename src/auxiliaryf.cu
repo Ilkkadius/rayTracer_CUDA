@@ -42,7 +42,7 @@ __host__ bool aux::stringToInt(const std::string& str, int& num) {
     return true;
 }
 
-std::string zero2front(int a)
+std::string aux::zero2front(int a)
 {
     return a >= 10 ? "" : "0";
 }
@@ -86,7 +86,7 @@ std::string aux::getRawDate() {
     time_t tt = std::chrono::system_clock::to_time_t(t);
     tm* timeInfo = localtime(&tt);
     char buffer[13];
-    const std::string format = "%y%m%d_%H%M";
+    const std::string format = "%y%m%d_%H%M%S";
     strftime(buffer, sizeof(buffer), format.c_str(), timeInfo);
     return std::string(buffer);
 }
