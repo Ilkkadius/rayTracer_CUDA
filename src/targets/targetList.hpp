@@ -3,7 +3,9 @@
 
 #include <cuda_runtime.h>
 
-#include "targetf.hpp"
+#include "target.hpp"
+#include "triangle.hpp"
+#include "sphere.hpp"
 #include "hitInfof.hpp"
 
 class TargetList{
@@ -12,11 +14,7 @@ public:
     Target** targets;
     size_t size, capacity;
 
-    __device__ TargetList(Target** targets_, int N, int maxN);
-
-    __device__ TargetList(int capacity_);
-
-    __device__ Target* operator[](int i);
+    __device__ TargetList(Target** targets_, int capacity_);
 
     /**
      * @brief Append a sequence of Targets to targetList, free given sequence

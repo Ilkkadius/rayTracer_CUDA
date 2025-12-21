@@ -14,7 +14,12 @@ __device__ Matrix generateRotation(float a, char c) {
 }
 
 __host__ __device__ Matrix generateRotation(float a, const Vector3D& axis) {
-    Vector3D k = unitVec(axis);
+    Vector3D k = axis;
     Matrix K(Vector3D(0, k.z, -k.y), Vector3D(-k.z, 0, k.x), Vector3D(k.y, -k.x, 0));
     return Matrix() + K * sin(a) + (1 - cos(a)) * K * K;
 }
+
+__device__ Vector3D rotateVec(const Vector3D& vec, double angle, const Vector3D& axis, const Vector3D& axisPos) {
+    Matrix rot = generateRotation(angle, axis);
+    return rot * (vec - axisPos) + axisPos;
+};

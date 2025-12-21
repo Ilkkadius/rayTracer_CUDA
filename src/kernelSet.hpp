@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include <SFML/Graphics.hpp>
 
-#include "targetf.hpp"
+#include "target.hpp"
 #include "backgroundsf.hpp"
 #include "tracerf.hpp"
 #include "compoundf.hpp"
@@ -131,7 +131,7 @@ __global__ void renderQuarter(sf::Uint8 *pixels,
  * @param fColors 
  * @param defaultColor
  */
-__global__ void generateTargets(TargetList** list, Shape** shapes, 
+__global__ void generateTargets(TargetList** list, 
                                 Vector3D* vertices, int* fVertices, 
                                 Vector3D* fColors, size_t fCount, 
                                 Vector3D* defaultColor);
@@ -140,11 +140,11 @@ __global__ void generateCompounds(Compound** list, Vector3D* vertices,
                                     int* fVertices, Vector3D* fColors, 
                                     size_t fCount, Vector3D* defaultColor);
 
-__global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCount, TargetList** list, Shape** shapes);
+__global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCount, TargetList** list);
 
 __global__ void initializeBG(BackgroundColor** background);
 
-__global__ void initializeTargets(Target** targets, TargetList** list, Shape** shapes, int capacity);
+__global__ void initializeTargets(Target** targets, TargetList** list, int capacity);
 
 __global__ void buildBVH(TargetList** listptr, BVHTree** tree);
 
@@ -153,9 +153,9 @@ __global__ void initializeRandSamples(curandState* randState, int seed = 1889);
 
 __global__ void releaseBG(BackgroundColor** background);
 
-__global__ void releaseTargets(Target** targets, TargetList** list, Shape** shapes);
+__global__ void releaseTargets(Target** targets, TargetList** list);
 
-__global__ void releaseBVH(Target** targets, TargetList** list, Shape** shapes, BVHTree* tree);
+__global__ void releaseBVH(Target** targets, TargetList** list, BVHTree* tree);
 
 
 #endif

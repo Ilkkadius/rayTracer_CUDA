@@ -9,7 +9,6 @@
 
 #include <memory>
 
-#include "geometria.hpp"
 #include "rayf.hpp"
 #include "tracerf.hpp"
 #include "rotationf.hpp"

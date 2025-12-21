@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "vector3D.hpp"
-#include "targetf.hpp"
+#include "target.hpp"
 #include "compoundf.hpp"
 #include "kernelSet.hpp"
 
@@ -129,7 +129,7 @@ namespace MeshRead{
      * @return true, if read was successfull
      * @return false, otherwise
      */
-    __host__ bool TargetsFromFile(const char* path, TargetList** list, Shape** shapes, const Vector3D& defaultColor = Vector3D(0.4,0.5,1));
+    __host__ bool TargetsFromFile(const char* path, TargetList** list, const Vector3D& defaultColor = Vector3D(0.4,0.5,1));
 
     /**
      * @brief Generate compounds from .obj file given by "path". NB: Currently generates only one compound

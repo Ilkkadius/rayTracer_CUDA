@@ -30,7 +30,7 @@ public:
      * @param shapes 
      * @return __device__ 
      */
-    __device__ void copyToList(TargetList* list, Shape** shapes);
+    __device__ void copyToList(TargetList* list);
 
     __device__ void mergeCompound(Compound& c);
 
@@ -38,15 +38,6 @@ public:
 
 };
 
-class compoundTest : public Compound{
-public:
-
-    __device__ compoundTest();
-
-private:
-    __device__ void generator();
-
-};
 
 /**
  * @brief Tetrahedron compound, 4 triangles

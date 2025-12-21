@@ -297,7 +297,7 @@ __global__ void renderQuarter(sf::Uint8 *pixels,
     pixels[idx + 3] = 255;
 }
 
-__global__ void generateTargets(TargetList** list, Shape** shapes, 
+__global__ void generateTargets(TargetList** list,
                                 Vector3D* vertices, int* fVertices, 
                                 Vector3D* fColors, size_t fCount, 
                                 Vector3D* defaultColor) {
@@ -310,10 +310,9 @@ __global__ void generateTargets(TargetList** list, Shape** shapes,
             color = (fColors[i].x >= 0 && fColors[i].y >= 0 && fColors[i].z >= 0) ? fColors[i] : *defaultColor; // Fix this!
 
             v1 = vertices[v[0]], v2 = vertices[v[1]], v3 = vertices[v[2]];
-            Triangle* T = new Triangle(v1, v2, v3);
-            fileCompound.add(new Target(T, color));
+            fileCompound.add(new Triangle(v1, v2, v3, color));
         }
-        fileCompound.copyToList(*list, shapes);
+        fileCompound.copyToList(*list);
     }
 }
 
@@ -329,17 +328,16 @@ __global__ void generateCompounds(Compound** list, Vector3D* vertices,
             color = (fColors[i].x >= 0 && fColors[i].y >= 0 && fColors[i].z >= 0) ? fColors[i] : *defaultColor; // Fix this!
 
             v1 = vertices[v[0]], v2 = vertices[v[1]], v3 = vertices[v[2]];
-            Triangle* T = new Triangle(v1, v2, v3);
-            fileCompound->add(new Target(T, color));
+            fileCompound->add(new Triangle(v1, v2, v3, color));
         }
         *list = fileCompound;
     }
 }
 
-__global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCount, TargetList** list, Shape** shapes) {
+__global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCount, TargetList** list) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
         for(int i = 0; i < compoundCount; i++) {
-            compounds[i]->copyToList(*list, shapes);
+            compounds[i]->copyToList(*list);
         }
     }
 }
@@ -350,9 +348,10 @@ __global__ void initializeBG(BackgroundColor** background) {
     }
 }
 
-__global__ void initializeTargets(Target** targets, TargetList** list, Shape** shapes, int capacity) {
+__global__ void initializeTargets(Target** targets, TargetList** list, int capacity) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
-        init::createTargets(targets, list, shapes, capacity);
+        *list = new TargetList(targets, capacity);
+        init::createTargets(list, capacity);
     }
 }
 
@@ -384,23 +383,21 @@ __global__ void releaseBG(BackgroundColor** background) {
     }
 }
 
-__global__ void releaseTargets(Target** targets, TargetList** list, Shape** shapes) {
+__global__ void releaseTargets(Target** targets, TargetList** list) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
-        TargetList l = **list;
-        for(int i = 0; i < l.size; i++) {
-            delete *(targets + i);
-            delete *(shapes + i);
+        TargetList* l = *list;
+        for(int i = 0; i < l->size; i++) {
+            delete targets[i];
         }
-        delete *list;
+        delete l;
     }
 }
 
-__global__ void releaseBVH(Target** targets, TargetList** list, Shape** shapes, BVHTree* tree) {
+__global__ void releaseBVH(Target** targets, TargetList** list, BVHTree* tree) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
         TargetList l = **list;
         for(int i = 0; i < l.size; i++) {
             delete *(targets + i);
-            delete *(shapes + i);
         }
         delete *list;
         tree->clear();

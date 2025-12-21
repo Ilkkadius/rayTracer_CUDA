@@ -3,7 +3,7 @@
 
 #include <cuda_runtime.h>
 
-#include "targetf.hpp"
+#include "target.hpp"
 #include "backgroundsf.hpp"
 #include "compoundf.hpp"
 #include "auxiliaryf.hpp"
@@ -24,7 +24,7 @@
 
 namespace init{
 
-__device__ void createTargets(Target** targets, TargetList** list, Shape** shapes, int capacity);
+__device__ void createTargets(TargetList** list, int capacity);
 
 __device__ BackgroundColor* createBackground(int i = 1);
 

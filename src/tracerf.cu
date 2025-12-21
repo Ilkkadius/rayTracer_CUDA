@@ -13,20 +13,20 @@ __device__ HitInfo closestHit(const Ray& ray, BVHTree* tree) {
     return hit;
 }
 
-__device__ Vector3D Trace(const Ray& ray, TargetList** listptr, BackgroundColor* background, int depth, curandState randState) {
+__device__ Vector3D Trace(const Ray& ray, TargetList** listptr, BackgroundColor* background, int depth, curandState& randState) {
     Ray current = ray;
     Vector3D rayColor(1.0f, 1.0f, 1.0f);
     HitInfo info;
 
     for(int i = 0; i < depth; i++) {
-        (*listptr)->findCollision(current, info);
+        info = closestHit(current, *listptr);
 
         if(info.t > epsilon) {
-            if(info.target->isRadiant()) {
-                return rayColor * info.target->emission();
+            if(info.emission > 0.0f) {
+                return rayColor * info.emission;
             } else {
-                rayColor = info.target->color * rayColor;
-                Vector3D p = info.point, n = info.normal;
+                rayColor = info.color * rayColor;
+                Vector3D p = current.at(info.t), n = info.normal;
                 Vector3D dir = n + aux::randUnitVec(&randState);
                 while(dir.lengthSquared() < 0.001f) {
                     dir = n + aux::randUnitVec(&randState);
@@ -50,11 +50,11 @@ __device__ Vector3D Trace(const Ray& ray, BVHTree* tree, BackgroundColor* backgr
         info = closestHit(current, tree);
 
         if(info.t > epsilon) {
-            if(info.target->isRadiant()) {
-                return rayColor * info.target->emission();
+            if(info.emission > 0.0f) {
+                return rayColor * info.emission;
             } else {
-                rayColor = info.target->color * rayColor;
-                Vector3D p = info.point, n = info.normal;
+                rayColor = info.color * rayColor;
+                Vector3D p = current.at(info.t), n = info.normal;
                 Vector3D dir = n + aux::randUnitVec(&randState);
                 while(dir.lengthSquared() < 0.001f) {
                     dir = n + aux::randUnitVec(&randState);

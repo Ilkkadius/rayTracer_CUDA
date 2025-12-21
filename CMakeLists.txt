@@ -14,7 +14,7 @@ find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
 message(SFML_FOUND=${SFML_FOUND})
 message(SFML_DIR=${SFML_DIR})
 
-include_directories(include src src/targets src/linalg src/io src/scene src/interactive ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+include_directories(include src src/targets src/targets/primitives src/linalg src/io src/scene src/interactive ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 add_executable(main main.cu)
 set_target_properties(main PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
