@@ -35,7 +35,8 @@ void cameraMove::rotateDirection(const sf::Vector2i& diff, Vector3D& direction, 
     Matrix rotationx = generateRotation(xangle, up);
     direction = rotationx * direction; up = rotationx * up;
     Matrix rotationy = generateRotation(yangle, unitRight);
-    direction = rotationy * direction; up = rotationy * up;
+    direction = unitVec(rotationy * direction); up = rotationy * up;
+    up = unitVec(up - Dot(up,direction)*direction);
 }
 
 void cameraMove::roll(const Vector3D& direction, Vector3D& up, double xangle) {
