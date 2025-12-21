@@ -16,7 +16,7 @@ __global__ void completeRender(sf::Uint8 *pixels,
     int idx = width * j + i;
     curandState rand = randState[idx];
 
-    Vector3D color = 255.0f * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
+    Vector3D color = 255.0f/samples * TracePixelRnd(window, i, j, list, depth, samples, *background, rand);
     
     randState[idx] = rand;
 
@@ -43,7 +43,7 @@ __global__ void completeRender(sf::Uint8 *pixels,
     int idx = width * j + i;
     curandState rand = randState[idx];
 
-    Vector3D color = 255.0f * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
+    Vector3D color = 255.0f/samples * TracePixelRnd(window, i, j, *tree, depth, samples, *background, rand);
 
     randState[idx] = rand;
 
@@ -138,7 +138,7 @@ __global__ void renderPixels(Vector3D* color,
     //curandState rand = randState[tidx];
     curandState rand = randState[randIdx];
 
-    sharedData[threadIdx.x] = {0.0f, 0.0f, 0.0f};
+    //sharedData[threadIdx.x] = {0.0f, 0.0f, 0.0f};
 
     int x = pixelIdx % width, y = pixelIdx / width;
 
