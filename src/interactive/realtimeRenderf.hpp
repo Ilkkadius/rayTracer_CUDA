@@ -40,7 +40,7 @@ namespace realtimeRender{
     void detectKey(const sf::Event& event, Vector3D& eye, Vector3D& direction, Vector3D& up, bool& changes, int& speed);
 
     template <class Tptr>
-    __host__ void simpleRender(sf::Uint8* pixels, Camera& cam, Tptr targetHolder, WindowVectors* windowPtr, BackgroundColor** background, curandState* randState) {
+    __host__ void simpleRender(sf::Uint8* pixels, Camera& cam, Tptr* targetHolder, WindowVectors* windowPtr, BackgroundColor** background, curandState* randState) {
         static int tx = 8, ty = 8;
         static dim3 blocks(divup(cam.width, tx), divup(cam.height, ty));
         static dim3 threads(tx, ty);
@@ -52,7 +52,7 @@ namespace realtimeRender{
     }
 
     template <class Tptr>
-    __host__ void startCamera(Camera& cam, Tptr targetHolder, BackgroundColor** background, curandState* randState, 
+    __host__ void startCamera(Camera& cam, Tptr* targetHolder, BackgroundColor** background, curandState* randState, 
                             Vector3D& eye, Vector3D& direction, Vector3D& up) {
         cam.check();
 

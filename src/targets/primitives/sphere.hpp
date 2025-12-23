@@ -12,6 +12,7 @@ public:
 
     __device__ bool rayCollision(const Ray& ray, HitInfo* hit) const;
     __device__ int allCollisions(const Ray& ray, HitInfo* hitlist) const;
+    __device__ int maxCollisions() const {return 2;}
 
     __device__ Vector3D centroid() const;
     

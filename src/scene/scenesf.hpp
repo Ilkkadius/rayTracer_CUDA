@@ -13,6 +13,8 @@ namespace Scene{
 
     __device__ void Platon(TargetList* list, int capacity);
 
+    __device__ void CSG(TargetList* list, int capacity);
+
 };
 
 #endif
