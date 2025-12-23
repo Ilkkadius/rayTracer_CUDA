@@ -6,6 +6,7 @@
 #include "target.hpp"
 #include "triangle.hpp"
 #include "sphere.hpp"
+#include "CSG.hpp"
 #include "hitInfof.hpp"
 
 class TargetList{

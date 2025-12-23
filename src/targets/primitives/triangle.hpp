@@ -10,7 +10,8 @@ public:
     __device__ Triangle(const Vector3D& vertex0, const Vector3D& vertex1, const Vector3D& vertex2, const Vector3D& color_, float emission_ = 0.0f);
 
     __device__ bool rayCollision(const Ray& ray, HitInfo* hit) const;
-    __device__ int allCollisions(const Ray& ray, HitInfo* hitlist) const;
+    __device__ int allCollisions(const Ray& ray, HitInfo* hitlist) const {return 0;}
+    __device__ int maxCollisions() const {return 0;}
 
     __device__ Vector3D centroid() const;
     

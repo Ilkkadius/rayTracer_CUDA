@@ -40,10 +40,6 @@ __device__ bool Triangle::rayCollision(const Ray& ray, HitInfo* hit) const {
     return false;
 }
 
-__device__ int Triangle::allCollisions(const Ray& ray, HitInfo* hitlist) const {
-    return 0;
-}
-
 __device__ Vector3D Triangle::centroid() const {
     return (v0 + v1 + v2)/3.0f;
 }
