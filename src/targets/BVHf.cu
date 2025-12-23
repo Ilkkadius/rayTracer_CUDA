@@ -50,7 +50,7 @@ __device__ BVHTree::BVHTree(TargetList** listptr) : nodeCount(0), targetCount(0)
 
 __device__ void BVHTree::findCollision(const Ray& ray, HitInfo& hit) const {
     if(targets == NULL) return;
-    Node* stack[100];
+    Node* stack[BVH_MAX_STACK];
     uint stackPtr = 0;
     Node* node = nodes;
     HitInfo tempHit;

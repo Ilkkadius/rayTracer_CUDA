@@ -26,7 +26,35 @@ __device__ bool Sphere::rayCollision(const Ray& ray, HitInfo* hit) const {
     return true;        
 }
 __device__ int Sphere::allCollisions(const Ray& ray, HitInfo* hitlist) const {
-    return 0;
+    Vector3D v = ray.pos - center;
+    float vd = Dot(v, ray.dir);
+    float disc = vd * vd - (v.lengthSquared() - radius * radius);
+    if(disc < 0.0f) {
+        hitlist[0].emission = -1.0f;
+        hitlist[1].emission = -1.0f;
+        return 0;
+    }
+    float root = sqrtf(disc);
+    float res = -vd - root;
+    if(res < 0.0f) {
+        res = -vd + root;
+        if(res < 0.0f) {
+            hitlist[0].emission = -1.0f;
+            hitlist[1].emission = -1.0f;
+            return 0;
+        }
+    }
+
+    hitlist[0].t = -vd - root;
+    hitlist[0].color = color;
+    hitlist[0].emission = emissivity;
+    hitlist[0].normal = unitVec(ray.at(-vd - root) - center);
+
+    hitlist[1].t = -vd + root;
+    hitlist[1].color = color;
+    hitlist[1].emission = emissivity;
+    hitlist[1].normal = unitVec(ray.at(-vd + root) - center);
+    return 2;     
 }
 
 __device__ Vector3D Sphere::centroid() const {return center;}

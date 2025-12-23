@@ -6,6 +6,8 @@
 #include "hitInfof.hpp"
 #include "targetList.hpp"
 
+#define BVH_MAX_STACK 25
+
 constexpr float maxDist = 1e20f;
 
 class Node{
@@ -22,7 +24,7 @@ public:
     uint nodeCount, targetCount;
     Node* nodes;
     Target** targets;
-    uint* tIdx;
+    uint* tIdx; // Change order of targets to remove need for additional mapping?
 
     __device__ BVHTree(TargetList** listptr);
 

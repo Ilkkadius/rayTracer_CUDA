@@ -15,7 +15,15 @@ public:
     float emissivity = 0.0f;
 
     __device__ virtual bool rayCollision(const Ray& ray, HitInfo* hit) const = 0;
+    /**
+     * @brief Find all collisions and writes them to hitlist. Number of writes equals maxCollisions(). Empty HitInfo elements flagged with negative emission
+     * 
+     * @param ray 
+     * @param hitlist 
+     * @return __device__ 
+     */
     __device__ virtual int allCollisions(const Ray& ray, HitInfo* hitlist) const = 0;
+    __device__ virtual int maxCollisions() const = 0;
 
     __device__ virtual Vector3D centroid() const = 0;
 
@@ -29,6 +37,7 @@ public:
     __device__ virtual Vector3D minBox() const = 0;
     __device__ virtual Vector3D maxBox() const = 0;
 
+    __device__ virtual void release() {};
 
 };
 

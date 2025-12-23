@@ -262,6 +262,7 @@ __global__ void releaseBVH(Target** targets, TargetList** list, BVHTree* tree) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
         TargetList l = **list;
         for(int i = 0; i < l.size; i++) {
+            targets[i]->release();
             delete *(targets + i);
         }
         delete *list;
