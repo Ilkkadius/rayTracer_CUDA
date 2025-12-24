@@ -17,7 +17,7 @@
 
 __device__ void init::createTargets(TargetList** list, int capacity) {
     int N = capacity;
-    switch(3) {
+    switch(4) {
         case 1:
             Scene::Platon(*list, N);
             break;
@@ -26,6 +26,9 @@ __device__ void init::createTargets(TargetList** list, int capacity) {
             break;
         case 3:
             Scene::CSG(*list, N);
+            break;
+        case 4:
+            Scene::CSG2(*list, N);
             break;
         default:
             Scene::empty(*list, N);

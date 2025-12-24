@@ -105,3 +105,41 @@ __device__ void Scene::CSG(TargetList* list, int capacity) {
     
 }
 
+__device__ void Scene::CSG2(TargetList* list, int capacity) {
+    list->targets[list->size++] = new Sphere(Vector3D(3,29,30), 15, Vector3D(1,1,1), 20);
+
+    {
+    CSGNode* nodes = new CSGNode[3];
+    nodes[0] = {1,0,CSG::DIFFERENCE};
+    nodes[1] = {0,0,CSG::NONE};
+    nodes[2] = {1,0,CSG::NONE};
+    Target** csgTargets = new Target*[2];
+    csgTargets[0] = new Sphere(Vector3D(5,0,-0.5),1.5,Vector3D(0.1,0.1,0.9)); 
+    csgTargets[1] = new Sphere(Vector3D(4.5,0,0.5),1,Vector3D(0.1,0.1,0.9));
+    list->targets[list->size++] = new ConstructiveShape(csgTargets,2,nodes,3);
+    }
+
+    {
+    CSGNode* nodes = new CSGNode[3];
+    nodes[0] = {1,0,CSG::UNION};
+    nodes[1] = {0,0,CSG::NONE};
+    nodes[2] = {1,0,CSG::NONE};
+    Target** csgTargets = new Target*[2];
+    csgTargets[0] = new Sphere(Vector3D(5,-4,-0.5),1.5,Vector3D(0.1,0.1,0.9)); 
+    csgTargets[1] = new Sphere(Vector3D(5,-3.5,0.5),1,Vector3D(0.1,0.1,0.9));
+    list->targets[list->size++] = new ConstructiveShape(csgTargets,2,nodes,3);
+    }
+
+    {
+    CSGNode* nodes = new CSGNode[3];
+    nodes[0] = {1,0,CSG::INTERSECTION};
+    nodes[1] = {0,0,CSG::NONE};
+    nodes[2] = {1,0,CSG::NONE};
+    Target** csgTargets = new Target*[2];
+    csgTargets[0] = new Sphere(Vector3D(5,4,-0.4),1.5,Vector3D(0.1,0.1,0.9)); 
+    csgTargets[1] = new Sphere(Vector3D(4.5,3.9,0.4),1,Vector3D(0.1,0.1,0.9));
+    list->targets[list->size++] = new ConstructiveShape(csgTargets,2,nodes,3);
+    }
+    
+}
+

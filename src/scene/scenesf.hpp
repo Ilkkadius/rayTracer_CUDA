@@ -15,6 +15,8 @@ namespace Scene{
 
     __device__ void CSG(TargetList* list, int capacity);
 
+    __device__ void CSG2(TargetList* list, int capacity);
+
 };
 
 #endif
