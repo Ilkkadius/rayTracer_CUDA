@@ -62,8 +62,8 @@ __device__ void ConstructiveShape::handleHits(const CSGNode& node, int lastHitId
 
 __device__ bool ConstructiveShape::rayCollision(const Ray& ray, HitInfo* hit) const {
 
-    HitInfo* hitlist = new HitInfo[2*maxCollisions()];
-    HitInfo* aux = hitlist + maxCollisions();
+    HitInfo hitlist[2*CSG_MAX_STACK];
+    HitInfo* aux = hitlist + CSG_MAX_STACK;
     int hitPtr = 0;
 
     for(int i = 0; i < nodeCount; i++) {
@@ -77,13 +77,11 @@ __device__ bool ConstructiveShape::rayCollision(const Ray& ray, HitInfo* hit) co
     }
 
     for(int i = 0; i < maxCollisions(); i++) {
-        if(hitlist[i].t > 0.0f) {
+        if(hitlist[i].t > epsilon) {
             *hit = hitlist[i];
-            delete[] hitlist;
             return true;
         }
     }
-    delete[] hitlist;
     return false;
 }
 __device__ int ConstructiveShape::allCollisions(const Ray& ray, HitInfo* hitlist) const {return 0;}
