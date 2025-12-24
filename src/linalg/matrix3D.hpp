@@ -37,6 +37,11 @@ public:
      */
     __host__ __device__ Vector3D r3() const;
 
+
+    __host__ __device__ Matrix T() const;
+
+    __host__ __device__ Matrix inverse() const;
+
 };
 
 /**
@@ -65,8 +70,8 @@ __host__ __device__ Matrix operator+(const Matrix& A, const Matrix& B);
 
 __host__ __device__ Matrix operator-(const Matrix& A, const Matrix& B);
 
-__host__ __device__ Matrix unitMatrix() {return Matrix(Vector3D(1.0f,0.0f,0.0f), Vector3D(0.0f,1.0f,0.0f), Vector3D(0.0f,0.0f,1.0f));}
+__host__ __device__ inline Matrix unitMatrix() {return Matrix(Vector3D(1.0f,0.0f,0.0f), Vector3D(0.0f,1.0f,0.0f), Vector3D(0.0f,0.0f,1.0f));}
 
-__host__ __device__ Matrix diagMatrix(const Vector3D& vec) {return Matrix(Vector3D(vec.x,0.0f,0.0f),Vector3D(0.0f,vec.y,0.0f),Vector3D(0.0f,0.0f,vec.z));}
+__host__ __device__ inline Matrix diagMatrix(const Vector3D& vec) {return Matrix(Vector3D(vec.x,0.0f,0.0f),Vector3D(0.0f,vec.y,0.0f),Vector3D(0.0f,0.0f,vec.z));}
 
 #endif
