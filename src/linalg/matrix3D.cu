@@ -27,6 +27,15 @@ __host__ __device__ Vector3D Matrix::r3() const {
     return Vector3D(c1.z, c2.z, c3.z);
 }
 
+__host__ __device__ Matrix Matrix::T() const {return Matrix(Vector3D(c1.x,c2.x,c3.x),Vector3D(c1.y,c2.y,c3.y),Vector3D(c1.z,c2.z,c3.z));}
+
+__host__ __device__ Matrix Matrix::inverse() const {
+    Matrix inv(Cross(c2,c3), Cross(c3,c1), Cross(c1,c2));
+    float invdet = Dot(c1, inv.c1);
+    invdet = 1.0f/invdet;
+    return invdet * inv.T();
+}
+
 __host__ __device__ Matrix operator*(const Matrix& A, const Matrix& B) {
     Vector3D c1(Dot(A.r1(), B.c1),Dot(A.r2(), B.c1),Dot(A.r3(), B.c1));
     Vector3D c2(Dot(A.r1(), B.c2),Dot(A.r2(), B.c2),Dot(A.r3(), B.c2));
