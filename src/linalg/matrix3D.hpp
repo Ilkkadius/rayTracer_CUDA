@@ -67,4 +67,6 @@ __host__ __device__ Matrix operator-(const Matrix& A, const Matrix& B);
 
 __host__ __device__ Matrix unitMatrix() {return Matrix(Vector3D(1.0f,0.0f,0.0f), Vector3D(0.0f,1.0f,0.0f), Vector3D(0.0f,0.0f,1.0f));}
 
+__host__ __device__ Matrix diagMatrix(const Vector3D& vec) {return Matrix(Vector3D(vec.x,0.0f,0.0f),Vector3D(0.0f,vec.y,0.0f),Vector3D(0.0f,0.0f,vec.z));}
+
 #endif
