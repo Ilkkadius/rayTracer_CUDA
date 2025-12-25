@@ -47,9 +47,6 @@ __device__ Vector3D Triangle::centroid() const {
 __device__ void Triangle::translate(const Vector3D& vec) {
     v0 += vec; v1 += vec; v2 += vec;
 }
-__device__ void Triangle::translate(float x, float y, float z) {
-    translate(Vector3D(x,y,z));
-}
 
 __device__ void Triangle::rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
     v0 = rotateVec(v0, angle, axis, axisPos);

@@ -87,37 +87,38 @@ __device__ bool ConstructiveShape::rayCollision(const Ray& ray, HitInfo* hit) co
 __device__ int ConstructiveShape::allCollisions(const Ray& ray, HitInfo* hitlist) const {return 0;}
 
 __device__ Vector3D ConstructiveShape::centroid() const {
-    return 0.5f * (minBox() + maxBox()); 
+    Vector3D center = Vector3D(0.0f,0.0f,0.0f);
+    for(int i = 0; i < targetCount; i++) center += targets[i]->centroid();
+    return center/targetCount; 
 }
 
 __device__ void ConstructiveShape::translate(const Vector3D& vec) {
-
-}
-__device__ void ConstructiveShape::translate(float x, float y, float z) {
-
+    for(int i = 0; i < targetCount; i++) {
+        targets[i]->translate(vec);
+    }
 }
 
 __device__ void ConstructiveShape::rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
-
+    for(int i = 0; i < targetCount; i++) {
+        targets[i]->rotate(angle, axis, axisPos);
+    }
 }
 
-__device__ Vector3D ConstructiveShape::emission() const {return Vector3D();}
+__device__ Vector3D ConstructiveShape::emission() const {return Vector3D(0,0,0);}
 
 __device__ Vector3D ConstructiveShape::minBox() const {
     if(targetCount < 1) return Vector3D(0,0,0);
-    Vector3D minbox = targets[nodes[nodePostorder[0]].first]->minBox();
-    for(int i = 1; i < nodeCount; i++) {
-        CSGNode n = nodes[nodePostorder[i]];
-        if(n.oper == CSG::NONE) minbox = minVector(minbox, targets[n.first]->minBox());
+    Vector3D minbox = targets[0]->minBox();
+    for(int i = 1; i < targetCount; i++) {
+        minbox = minVector(minbox, targets[i]->minBox());
     }
     return minbox;
 }
 __device__ Vector3D ConstructiveShape::maxBox() const {
     if(targetCount < 1) return Vector3D(0,0,0);
-    Vector3D maxbox = targets[nodes[nodePostorder[0]].first]->maxBox();
-    for(int i = 1; i < nodeCount; i++) {
-        CSGNode n = nodes[nodePostorder[i]];
-        if(n.oper == CSG::NONE) maxbox = maxVector(maxbox, targets[n.first]->maxBox());
+    Vector3D maxbox = targets[0]->maxBox();
+    for(int i = 1; i < targetCount; i++) {
+        maxbox = maxVector(maxbox, targets[i]->maxBox());
     }
     return maxbox;
 }
