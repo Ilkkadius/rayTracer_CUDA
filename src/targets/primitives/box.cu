@@ -72,7 +72,6 @@ __device__ int Box::allCollisions(const Ray& ray, HitInfo* hitlist) const {
 __device__ Vector3D Box::centroid() const {return center;}
 
 __device__ void Box::translate(const Vector3D& vec) {center += vec;}
-__device__ void Box::translate(float x, float y, float z) {translate(Vector3D(x,y,z));}
 
 __device__ void Box::rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
     center = rotateVec(center, angle, axis, axisPos); invmat = (generateRotation(angle, axis) * invmat.inverse()).inverse();

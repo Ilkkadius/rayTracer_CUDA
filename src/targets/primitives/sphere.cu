@@ -62,9 +62,6 @@ __device__ Vector3D Sphere::centroid() const {return center;}
 __device__ void Sphere::translate(const Vector3D& vec) {
     center += vec;
 }
-__device__ void Sphere::translate(float x, float y, float z) {
-    translate(Vector3D(x,y,z));
-}
 
 __device__ void Sphere::rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
     center = rotateVec(center, angle, axis, axisPos);
