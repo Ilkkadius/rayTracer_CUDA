@@ -11,13 +11,13 @@ __device__ void ConstructiveShape::handleHits(const CSGNode& node, int lastHitId
     int nl = lmax, nr = rmax;
     for(int i = 0; i < lmax; i++) {
         if(lhits[i].emission < 0.0f) {
-            nl = i+1;
+            nl = i;
             break;
         }
     }
     for(int i = 0; i < rmax; i++) {
         if(rhits[i].emission < 0.0f) {
-            nr = i+1;
+            nr = i;
             break;
         }
         if(node.oper == CSG::DIFFERENCE) rhits[i].normal = -1.0*rhits[i].normal;

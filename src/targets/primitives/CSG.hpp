@@ -58,7 +58,7 @@ public:
 
 private:
 
-    __device__ void handleHits(const CSGNode& node, int lastHitIdx, HitInfo* hitlist, HitInfo* aux)const;
+    __device__ void handleHits(const CSGNode& node, int lastHitIdx, HitInfo* hitlist, HitInfo* aux) const;
 
     __device__ void buildPostorder() {
         nodePostorder = new uint[nodeCount];
