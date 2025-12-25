@@ -85,6 +85,28 @@ namespace aux{
 
     std::string getDuration(double duration);
 
+    inline std::string line(int width) {
+        std::stringstream ss;
+        for(int i = 0; i < width; i++)
+            ss << "-";
+        return ss.str();
+    }
+
+    inline void error(const std::string& message) {
+        int l = std::min(50, (int)message.size());
+        std::cout << "\n" << aux::line(l) << std::endl;
+        std::cout << message << std::endl;
+        std::cout << aux::line(l) << std::endl;
+        exit(1);
+    }
+    inline void error(const char* filepath, uint linenum, const std::string& message) {
+        std::cout << "\n" << aux::line(50) << std::endl;
+        std::cout << "ERROR in " << filepath << std::endl;
+        std::cout << "Line " << linenum << ": " << message << std::endl;
+        std::cout << aux::line(50) << std::endl;
+        exit(1);
+    }
+
 }
 
     template <typename T>
