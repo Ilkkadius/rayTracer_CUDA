@@ -13,6 +13,24 @@ enum class CSG {
     NONE
 };
 
+__host__ inline std::ostream& operator<<(std::ostream& os, CSG csg) {
+    switch(csg) {
+        case CSG::UNION:
+            os << "UNION";
+            break;
+        case CSG::DIFFERENCE:
+            os << "DIFFERENCE";
+            break;
+        case CSG::INTERSECTION:
+            os << "INTERSECTION";
+            break;
+        case CSG::NONE:
+            os << "NONE";
+            break;
+    }
+    return os;
+}
+
 struct CSGNode {
     uint first, maxCollisionCount;
     CSG oper;
