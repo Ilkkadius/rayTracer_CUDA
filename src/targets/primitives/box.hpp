@@ -9,6 +9,7 @@ public:
     Vector3D center;
 
     __device__ Box(const Vector3D& minimumCorner, const Vector3D& maximumCorner, const Vector3D& color_, float emissivity_ = 0.0f);
+    __device__ Box(float xw, float yw, float zw, const Vector3D& color_, float emissivity_ = 0.0f);
 
     __device__ bool rayCollision(const Ray& ray, HitInfo* hit) const;
     __device__ int allCollisions(const Ray& ray, HitInfo* hitlist) const;
