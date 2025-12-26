@@ -8,6 +8,12 @@ __device__ Box::Box(const Vector3D& minimumCorner, const Vector3D& maximumCorner
     invmat = diagMatrix(max).inverse();
 }
 
+__device__ Box::Box(float xw, float yw, float zw, const Vector3D& color_, float emissivity_) {
+    color = color_; emissivity = emissivity_;
+    center = Vector3D(0.0f,0.0f,0.0f);
+    invmat = diagMatrix(2.0f*Vector3D(1.0f/xw, 1.0f/yw, 1.0f/zw));
+}
+
 __device__ bool Box::rayCollision(const Ray& ray, HitInfo* hit) const {
     HitInfo hits[2];
     int n = allCollisions(ray, hits);
