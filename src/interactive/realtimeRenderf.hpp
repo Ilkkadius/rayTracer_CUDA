@@ -52,18 +52,28 @@ namespace realtimeRender{
     }
 
     template <class Tptr>
-    __host__ void startCamera(Camera& cam, Tptr* targetHolder, BackgroundColor** background, curandState* randState, 
-                            Vector3D& eye, Vector3D& direction, Vector3D& up) {
+    __host__ void startCamera(Camera& cam, Tptr* targetHolder, BackgroundColor** background) {
         cam.check();
 
         Camera camCpy = cam;
         camCpy.samples = 2;
-        camCpy.width = camCpy.width/2;
-        camCpy.height = camCpy.height/2;
+        camCpy.width = std::min(MAXIMUM_WINDOW_WIDTH, std::max(camCpy.width/2,100));
+        camCpy.height = std::min(MAXIMUM_WINDOW_HEIGHT, std::max(camCpy.height/2,100));
         camCpy.depth = 3;
 
         sf::Texture texture;
         texture.create(camCpy.width, camCpy.height);
+
+        curandState* randState;
+        {
+            dim3 blocks(divup(cam.width, 8), divup(cam.height, 8));
+            dim3 threads(8, 8);
+
+            CHECK(cudaMalloc(&randState, camCpy.width*camCpy.height*sizeof(curandState)));
+            initializeRand<<<blocks, threads>>>(randState, camCpy.width, camCpy.height);
+            CHECK(cudaDeviceSynchronize());
+        }
+        
 
         sf::Uint8* pixels;
         CHECK(cudaMallocManaged(&pixels, camCpy.width * camCpy.height * 4));
@@ -121,11 +131,10 @@ namespace realtimeRender{
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::V)) { // Save camera position
                     time1 = clock1.getElapsedTime();
                     if(time1.asMilliseconds() > 1200) {
-                        eye = camCpy.eye; direction = camCpy.direction; up = camCpy.up;
                         std::cout << "\033[0;93mCurrent camera position:\033[0m" << std::endl;
-                        std::cout << "eye: " << eye << std::endl;
-                        std::cout << "direction: " << direction << std::endl;
-                        std::cout << "up: " << up << std::endl;
+                        std::cout << "eye: " << camCpy.eye << std::endl;
+                        std::cout << "direction: " << camCpy.direction << std::endl;
+                        std::cout << "up: " << camCpy.up << std::endl;
                         clock1.restart();
                     }
                 }
