@@ -5,6 +5,10 @@
 #include "rayf.hpp"
 #include "target.hpp"
 
+/**
+ * @brief Records a ray-Target collision. The normal MUST be normalized!
+ * 
+ */
 class HitInfo{
 public:
     Vector3D normal;
