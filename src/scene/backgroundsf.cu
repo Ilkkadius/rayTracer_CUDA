@@ -1,5 +1,10 @@
 #include "backgroundsf.hpp"
 
+__device__ darkness::darkness() {}
+
+__device__ Vector3D darkness::colorize(const Ray& ray) const {
+    return Vector3D(0.0f,0.0f,0.0f);
+}
 
 __device__ dayTime::dayTime(const Vector3D& color) : color_(color) {}
 
