@@ -18,15 +18,19 @@ In addition to "static rendering", also interactive camera mode can be used. Con
 
 ## Other features
 
-Currently only spheres and triangles are supported. Scattering process is Lambertian.
+Spheres, triangles and boxes are the supported primitives. Scattering process is Lambertian.
 
 ![Platonic solids](/figures/25000_sample_Platon.png)
 
-3D models can be imported to the program - see an example below. Supported file type is **.obj**
+3D triangle mesh can be imported to the program - see an example below. Supported file type is **.obj**
 
 ![Teacup](/figures/teacup_N10000.png)
 
 To further increase the efficiency, a bounding volume hierarchy (BVH) structure is used as an acceleration structure.
+
+CSG shapes based on UNION, INTERSECTION and DIFFERENCE and built from 3D primitives are supported. The shapes can be read from a text file. TODO: Add file syntax explanation
+
+![CSG](/figures/csg_N10000_2min47s.png)
 
 ---
 
