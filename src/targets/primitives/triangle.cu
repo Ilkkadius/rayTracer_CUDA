@@ -54,5 +54,11 @@ __device__ void Triangle::rotate(float angle, const Vector3D& axis, const Vector
     v2 = rotateVec(v2, angle, axis, axisPos);
 }
 
+__device__ void Triangle::affine(const Matrix& A, const Vector3D& b) {
+    v0 = A*v0 + b;
+    v1 = A*v1 + b;
+    v2 = A*v2 + b;
+}
+
 __device__ Vector3D Triangle::minBox() const {return minVector(v2, minVector(v0, v1));}
 __device__ Vector3D Triangle::maxBox() const {return maxVector(v2, maxVector(v0, v1));}

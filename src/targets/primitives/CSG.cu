@@ -104,6 +104,12 @@ __device__ void ConstructiveShape::rotate(float angle, const Vector3D& axis, con
     }
 }
 
+__device__ void ConstructiveShape::affine(const Matrix& A, const Vector3D& b) {
+    for(int i = 0; i < targetCount; i++) {
+        targets[i]->affine(A, b);
+    }
+}
+
 __device__ Vector3D ConstructiveShape::emission() const {return Vector3D(0,0,0);}
 
 __device__ Vector3D ConstructiveShape::minBox() const {

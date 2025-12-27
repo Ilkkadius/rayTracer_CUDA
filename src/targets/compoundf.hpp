@@ -14,7 +14,6 @@ public:
     __device__ Vector3D centroid() const;
 
     __device__ void translate(const Vector3D& vec);
-    __device__ void translate(float x, float y, float z);
 
     __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos);
 

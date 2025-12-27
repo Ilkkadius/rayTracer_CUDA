@@ -28,9 +28,8 @@ public:
     __device__ virtual Vector3D centroid() const = 0;
 
     __device__ virtual void translate(const Vector3D& vec) = 0;
-    __device__ virtual void translate(float x, float y, float z) {translate(Vector3D(x,y,z));}
-
     __device__ virtual void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) = 0;
+    __device__ virtual void affine(const Matrix& A, const Vector3D& b) = 0;
 
     __device__ virtual Vector3D emission() const {return color;}
 
