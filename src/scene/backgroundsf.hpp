@@ -6,6 +6,13 @@
 #include "vector3D.hpp"
 #include "rayf.hpp"
 
+enum class backgroundType {
+    DARKNESS,
+    DAY,
+    NIGHT,
+    DEFAULT
+};
+
 /**
  * @brief Defines the color of a ray that escapes without collisions
  * 

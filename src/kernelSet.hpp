@@ -133,7 +133,7 @@ __global__ void generateCompounds(Compound** list, Vector3D* vertices,
 
 __global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCount, TargetList** list);
 
-__global__ void initializeBG(BackgroundColor** background);
+__global__ void initializeBG(BackgroundColor** background, backgroundType type);
 
 __global__ void initializeTargets(Target** targets, TargetList** list, int capacity);
 

@@ -26,7 +26,7 @@ namespace init{
 
 __device__ void createTargets(TargetList** list, int capacity);
 
-__device__ BackgroundColor* createBackground(int i = 0);
+__device__ BackgroundColor* createBackground(backgroundType type = backgroundType::DARKNESS);
 
 };
 
