@@ -166,7 +166,7 @@ __host__ bool MeshRead::TargetsFromFile(const char* path, TargetList** list, con
     CHECK(cudaMallocManaged(&defCol, sizeof(Vector3D)));
     *defCol = defaultColor;
 
-    generateTargets<<<1, 1>>>(list, verts, fVerts, fCols, fVertices.size(), defCol);
+    generateTriangles<<<1, 1>>>(list, verts, fVerts, fCols, fVertices.size(), defCol);
     CHECK(cudaDeviceSynchronize());
 
     if(is.is_open()) {

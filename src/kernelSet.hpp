@@ -122,7 +122,7 @@ __global__ void RealTimeUpdateRender(sf::Uint8 *pixels,
  * @param fColors 
  * @param defaultColor
  */
-__global__ void generateTargets(TargetList** list, 
+__global__ void generateTriangles(TargetList** list, 
                                 Vector3D* vertices, int* fVertices, 
                                 Vector3D* fColors, size_t fCount, 
                                 Vector3D* defaultColor);
