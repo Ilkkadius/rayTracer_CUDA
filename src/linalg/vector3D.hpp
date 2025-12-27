@@ -11,7 +11,7 @@ public:
 
     // Default constructor
 
-    __device__ Vector3D() {};
+    __host__ __device__ Vector3D() {};
 
     //__host__ __device__ Vector3D() : x(0.0f), y(0.0f), z(0.0f) {}
 
