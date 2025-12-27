@@ -16,8 +16,8 @@ public:
     __device__ Vector3D centroid() const;
     
     __device__ void translate(const Vector3D& vec);
-
     __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos);
+    __device__ void affine(const Matrix& A, const Vector3D& b);
 
     __device__ Vector3D minBox() const;
     __device__ Vector3D maxBox() const;

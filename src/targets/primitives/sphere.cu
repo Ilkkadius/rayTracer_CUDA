@@ -67,5 +67,9 @@ __device__ void Sphere::rotate(float angle, const Vector3D& axis, const Vector3D
     center = rotateVec(center, angle, axis, axisPos);
 }
 
+__device__ void Sphere::affine(const Matrix& A, const Vector3D& b) {
+    center = A * center + b;
+}
+
 __device__ Vector3D Sphere::minBox() const {return center - Vector3D(radius, radius, radius);}
 __device__ Vector3D Sphere::maxBox() const {return center + Vector3D(radius, radius, radius);}
