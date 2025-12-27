@@ -207,9 +207,9 @@ __global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCo
     }
 }
 
-__global__ void initializeBG(BackgroundColor** background) {
+__global__ void initializeBG(BackgroundColor** background, backgroundType type) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
-        *background = init::createBackground();
+        *background = init::createBackground(type);
     }
 }
 

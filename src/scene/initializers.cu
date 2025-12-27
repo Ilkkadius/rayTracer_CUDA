@@ -39,14 +39,14 @@ __device__ void init::createTargets(TargetList** list, int capacity) {
     }
 }
 
-__device__ BackgroundColor* init::createBackground(int i) {
-    switch(i) {
-        case 1:
+__device__ BackgroundColor* init::createBackground(backgroundType type) {
+    switch(type) {
+        case backgroundType::NIGHT:
             return new nightTime();
-        case 2:
-            return new darkness();
-        default:
+        case backgroundType::DAY:
             return new dayTime();
+        default:
+            return new darkness();
     }
 }
 

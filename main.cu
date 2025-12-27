@@ -137,9 +137,10 @@ int main(int argc, char *argv[]) {
     Vector3D *results;
     CHECK(cudaMallocManaged(&results, width*height*sizeof(Vector3D)));
 
+    backgroundType bgType = backgroundType::NIGHT;
     BackgroundColor** background_d;
     CHECK(cudaMalloc(&background_d, sizeof(BackgroundColor*)));
-    initializeBG<<<1,1>>>(background_d);
+    initializeBG<<<1,1>>>(background_d, bgType);
     CHECK(cudaDeviceSynchronize());
     std::cout << "Background ready" << std::endl;
 
@@ -163,9 +164,6 @@ int main(int argc, char *argv[]) {
     Compound** compounds;
     CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
     CHECK(cudaDeviceSynchronize());
-    //size_t compoundCount;
-    //MeshRead::CompoundsFromFile("teapot.obj", compounds, compoundCount);
-    //addCompoundsToTargetlist<<<1,1>>>(compounds, 1, list, shapes);
     
     BVHTree** tree;
     CHECK(cudaMalloc(&tree, sizeof(BVHTree*)));
