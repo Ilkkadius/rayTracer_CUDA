@@ -17,6 +17,14 @@ public:
     }
 };
 
+class darkness : public BackgroundColor{
+public:
+
+    __device__ darkness();
+
+    __device__ Vector3D colorize(const Ray& ray) const;
+};
+
 class dayTime : public BackgroundColor{
 public:
 
