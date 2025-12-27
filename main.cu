@@ -83,15 +83,8 @@ int main(int argc, char *argv[]) {
 
     }
 
-    std::string parentDir = "";
-	{
-		std::string maincpp = std::string(__FILE__); int spot = 0;
-		for(int i = 0; i < maincpp.size(); i++)
-			if(maincpp[i] == '/' || maincpp[i] == '\\')
-				spot = i;
-		if(spot > 0) parentDir = maincpp.substr(0, spot) + "/";
-	}
-
+    std::string parentDir = aux::parentDirectory(__FILE__);
+    std::cout << parentDir << std::endl;
 
     // #################################
     // # LOAD DATA TO DEVICE

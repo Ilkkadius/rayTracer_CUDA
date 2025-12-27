@@ -57,6 +57,14 @@ namespace aux{
 
     std::string zero2front(int a);
 
+    __host__ inline std::string parentDirectory(const char* path) {
+		std::string maincpp = std::string(path); int spot = 0;
+		for(int i = 0; i < maincpp.size(); i++)
+			if(maincpp[i] == '/' || maincpp[i] == '\\')
+				spot = i;
+        return maincpp.substr(0, spot) + "/";
+    }
+
     /**
      * @brief e.g. 1. Jan. 2023: 20:30:15
      */
