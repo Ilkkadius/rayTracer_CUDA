@@ -21,6 +21,7 @@
 #include "kernelSet.hpp"
 #include "realtimeRenderf.hpp"
 #include "renderMode.hpp"
+#include "csgRead.hpp"
 
 
 // ################################################################
@@ -51,6 +52,7 @@ int main(int argc, char *argv[]) {
     bool backup = false;
     bool realTime = false;
     bool fileRead = false;
+    bool readCSG = true;
 
     cam.setFOV(80.0f);
 
@@ -80,6 +82,16 @@ int main(int argc, char *argv[]) {
         }
 
     }
+
+    std::string parentDir = "";
+	{
+		std::string maincpp = std::string(__FILE__); int spot = 0;
+		for(int i = 0; i < maincpp.size(); i++)
+			if(maincpp[i] == '/' || maincpp[i] == '\\')
+				spot = i;
+		if(spot > 0) parentDir = maincpp.substr(0, spot) + "/";
+	}
+
 
     // #################################
     // # LOAD DATA TO DEVICE
@@ -136,6 +148,12 @@ int main(int argc, char *argv[]) {
     CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
     initializeTargets<<<1,1>>>(targets, list, N);
     CHECK(cudaDeviceSynchronize());
+
+
+    if(readCSG) csgRead::csgFromFile((parentDir + "csg.txt").c_str(), list);
+
+
+
     
     if(fileRead) {
         MeshRead::TargetsFromFile("teapot.obj", list);
