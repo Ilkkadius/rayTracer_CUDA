@@ -83,6 +83,11 @@ __device__ void Box::rotate(float angle, const Vector3D& axis, const Vector3D& a
     center = rotateVec(center, angle, axis, axisPos); invmat = (generateRotation(angle, axis) * invmat.inverse()).inverse();
 }
 
+__device__ void Box::affine(const Matrix& A, const Vector3D& b) {
+    center = A * center + b;
+    invmat = (A * invmat.inverse()).inverse();
+}
+
 __device__ Vector3D Box::minBox() const {
     Vector3D corner = invmat.inverse() * Vector3D(1.0f,1.0f,1.0f); float r = corner.length();
     return center - Vector3D(r,r,r);

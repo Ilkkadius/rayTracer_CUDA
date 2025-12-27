@@ -20,11 +20,6 @@ __device__ void Compound::translate(const Vector3D& vec) {
         targets[i]->translate(vec);
     }
 }
-__device__ void Compound::translate(float x, float y, float z) {
-    for(int i = 0; i < size; i++) {
-        targets[i]->translate(x,y,z);
-    }
-}
 
 __device__ void Compound::rotate(float angle, const Vector3D& axis, const Vector3D& axisPos) {
     for(int i = 0; i < size; i++) {

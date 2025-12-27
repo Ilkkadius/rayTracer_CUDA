@@ -4,7 +4,7 @@
 #include "target.hpp"
 
 // CSG_MAX_STACK should be at least as large as maxCollisions() of a CSG object, typically 2*targetCount!
-#define CSG_MAX_STACK 10
+#define CSG_MAX_STACK 25
 
 enum class CSG {
     UNION,
@@ -54,8 +54,8 @@ public:
     __device__ Vector3D centroid() const;
     
     __device__ void translate(const Vector3D& vec);
-
     __device__ void rotate(float angle, const Vector3D& axis, const Vector3D& axisPos);
+    __device__ void affine(const Matrix& A, const Vector3D& b);
 
     __device__ Vector3D emission() const;
 
@@ -80,7 +80,8 @@ private:
 
     __device__ void buildPostorder() {
         nodePostorder = new uint[nodeCount];
-        int stack[100], current = 0;
+        if(!nodePostorder) printf("CSG buildPostorder: allocation failed\n");
+        int stack[CSG_MAX_STACK], current = 0;
         int lastVisit = -1, stackPtr = 0, orderPtr = 0;
 
         int iter = 0;
