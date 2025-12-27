@@ -12,16 +12,7 @@
 
 #include "vector3D.hpp"
 
-#define M_PI 3.14159265358979323846
-
-
-#define THREADS_PER_BLOCK int(512)
-#define SINGLE_KERNEL_RENDER FALSE
-#define KERNEL_RUNTIME_MAX_LIMIT 1.5f
-#define KERNEL_RUNTIME_MIN_LIMIT 0.5f
-#define MAXIMUM_CURANDSTATE_MEMORY 1000000000 // In bytes
-#define MAXIMUM_TARGET_COUNT int(2000)
-#define PIXELRENDER_MAXIMUM_OFFSET int(1000);
+#include "macros.hpp"
 
 
 static constexpr float epsilon = 0.0001f; // Do not decrease, shadow acne will occur
