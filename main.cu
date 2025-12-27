@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
 
     Camera cam;
 
-    int width = 1920, height = 1080;
-    int depth = 4, samples = 10;
+    cam.width = 1920; cam.height = 1080;
+    cam.depth = 4; cam.samples = 10;
     int tx = 8, ty = 8;
     bool backup = false;
     bool realTime = false;
@@ -74,9 +74,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if(argc == 3) {
-        aux::stringToInt((std::string)argv[2], samples);
-        if(samples < 1) {
+    if(argc >= 3) {
+        aux::stringToInt((std::string)argv[2], cam.samples);
+        if(cam.samples < 1) {
             std::cout << termcolor::bold << termcolor::red << "Samplecount must be at least 1" << termcolor::reset << std::endl;
             exit(1);
         }
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     "#################################" 
     << termcolor::reset << std::endl;
 
-    std::cout << "Resolution: " << width << "x" << height << ", N = " << samples << ", recursion = " << depth << std::endl;
+    std::cout << "Resolution: " << cam.width << "x" << cam.height << ", N = " << cam.samples << ", recursion = " << cam.depth << std::endl;
     std::cout << "Backup to file: ";
     if(backup) {
         std::cout << termcolor::bright_green;
@@ -106,21 +106,20 @@ int main(int argc, char *argv[]) {
     }
     std::cout << std::boolalpha << backup << termcolor::reset << std::endl;
 
-    cam.width = width; cam.height = height;
-    cam.depth = depth; cam.samples = samples;
-
     cam.eye = eye;
     cam.direction = direction;
     cam.up = up;
 
     cam.check();
 
+    int width = cam.width, height = cam.height;
+
     cudaDeviceSetLimit(cudaLimitStackSize, 4096);
 
     std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
-                            + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.bin");
+                            + (cam.samples > 0 ? "_N" + std::to_string(cam.samples) : "") + "_GPU_backup.bin");
     std::string backupTextPath = "" + aux::getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
-                            + (samples > 0 ? "_N" + std::to_string(samples) : "") + "_GPU_backup.txt";
+                            + (cam.samples > 0 ? "_N" + std::to_string(cam.samples) : "") + "_GPU_backup.txt";
 
     WindowVectors *cudaWindow = NULL;
     CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
@@ -146,9 +145,6 @@ int main(int argc, char *argv[]) {
 
     if(readCSG) csgRead::csgFromFile((parentDir + "csg.txt").c_str(), list);
 
-
-
-    
     if(fileRead) {
         MeshRead::TargetsFromFile("teapot.obj", list);
         CHECK(cudaDeviceSynchronize());
@@ -167,14 +163,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Targets generated" << std::endl;
 
     if(realTime) {
-        dim3 blocks(divup(width, tx), divup(height, ty));
-        dim3 threads(tx, ty);
-
-        curandState *randState_d;
-        CHECK(cudaMalloc(&randState_d, width*height*sizeof(curandState)));
-        initializeRand<<<blocks, threads>>>(randState_d, width, height);
-        CHECK(cudaDeviceSynchronize());
-        realtimeRender::startCamera(cam, tree, background_d, randState_d, eye, direction, up); // TREE
+        realtimeRender::startCamera(cam, tree, background_d);
         return 0;
     }
 
@@ -183,13 +172,13 @@ int main(int argc, char *argv[]) {
 
     switch(launchMode) {
         case RenderMode::Single_full: // Full image rendered by one kernel
-            Mode::FullRender(width, height, tx, ty, start, &randState_d, results, depth, samples, tree, background_d, cudaWindow);
+            Mode::FullRender(width, height, tx, ty, start, &randState_d, results, cam.depth, cam.samples, tree, background_d, cudaWindow);
             break;
         case RenderMode::Partial_full: // Set of kernels each rendering the full image, but number of samples divided evenly among the kernels
-            Mode::partialFullRender(width, height, tx, ty, start, &randState_d, results, depth, samples, tree, background_d, cudaWindow);
+            Mode::partialFullRender(width, height, tx, ty, start, &randState_d, results, cam.depth, cam.samples, tree, background_d, cudaWindow);
             break;
         case RenderMode::Partial_pixel: // A large set of kernels each rendering one or many pixels of the image
-            Mode::partialPixelRender(width, height, tx, ty, start, &randState_d, results, depth, samples, tree, background_d, cudaWindow);
+            Mode::partialPixelRender(width, height, tx, ty, start, &randState_d, results, cam.depth, cam.samples, tree, background_d, cudaWindow);
             break;
     }
 
@@ -202,7 +191,7 @@ int main(int argc, char *argv[]) {
     sf::Uint8* pixels = new sf::Uint8[width*height*4];
 
     for(int i = 0; i < width*height; i++) {
-        Vector3D p = results[i]/float(samples);
+        Vector3D p = results[i]/float(cam.samples);
         if(p.max() > 1.0f) {
             p =  p/p.max();
         }
@@ -216,14 +205,14 @@ int main(int argc, char *argv[]) {
 
 
     if(backup) {
-        Image::ToBinary(pixels, width, height);
+        Image::ToBinary(pixels, cam.width, cam.height);
     }
 
     //######################################
     // # GENERATE IMAGE, FREE MEMORY
     //######################################
 
-    Image::writePNG(pixels, width, height, samples, duration);
+    Image::writePNG(pixels, cam.width, cam.height, cam.samples, duration);
     delete[] pixels;
 
     CHECK(cudaFree(results));
