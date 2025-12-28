@@ -135,7 +135,7 @@ __global__ void addCompoundsToTargetlist(Compound** compounds, size_t compoundCo
 
 __global__ void initializeBG(BackgroundColor** background, backgroundType type);
 
-__global__ void initializeTargets(Target** targets, TargetList** list, int capacity);
+__global__ void initializeTargets(Target** targets, TargetList** list, int capacity, sceneType type);
 
 __global__ void buildBVH(TargetList** listptr, BVHTree** tree);
 

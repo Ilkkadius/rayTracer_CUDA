@@ -2,7 +2,6 @@
 
 #include "CSG.hpp"
 
-__device__ void Scene::testScene(TargetList* list, int capacity) {
 __host__ bool Scene::parseScene(std::string line, sceneType& type) {
     aux::uppercase(line);
     if(line == "EMPTY" || line == "VOID") {
@@ -22,6 +21,7 @@ __host__ bool Scene::parseScene(std::string line, sceneType& type) {
 }
 
 
+__device__ void Scene::testScene(TargetList* list) {
     //float r = 500;
     Vector3D red(0.9,0.1,0.1), green(0.1,0.9,0.1), blue(0.1,0.1,0.9), white(1,1,1), black(0,0,0);
 
@@ -33,28 +33,11 @@ __host__ bool Scene::parseScene(std::string line, sceneType& type) {
 
 }
 
-__device__ void Scene::empty(TargetList* list, int capacity) {}
+__device__ void Scene::empty(TargetList* list) {}
 
-__device__ void Scene::Platon(TargetList* list, int capacity) {
+__device__ void Scene::Platon(TargetList* list) {
 
     list->targets[list->size++] = new Sphere(Vector3D(3,29,30), 15, Vector3D(1,1,1), 20);
-
-    /*
-    HitInfo* hitlist = new HitInfo[6];
-    for(int i = 0; i < 6; i++) {
-        hitlist[i].t = 0.0f;
-        hitlist[i].color = Vector3D(0,0,0);
-        hitlist[i].normal = Vector3D(0,0,0);
-        hitlist[i].emission = 0.0f;
-    }
-    Ray ray(Vector3D(3,29,30),Vector3D(0,0,0));
-    list->targets[list->size-1]->allCollisions(ray, hitlist);
-    list->targets[list->size-1]->allCollisions(ray, hitlist+4);
-
-    for(int i = 0; i < 6; i++) {
-        printf("%f %f\n", hitlist[i].t, hitlist[i].emission);
-    }
-    */
     
     Icosahedron* icosa = new Icosahedron(Vector3D(9,5.5,-2), 2, Vector3D(0.5*0.9,0.5*0.9,0.9*0.2));
     icosa->copyToList(list);
@@ -88,7 +71,7 @@ __device__ void Scene::Platon(TargetList* list, int capacity) {
     
 }
 
-__device__ void Scene::CSG(TargetList* list, int capacity) {
+__device__ void Scene::CSG(TargetList* list) {
     CSGNode* nodes = new CSGNode[3];
     nodes[0] = {1,0,CSG::DIFFERENCE};
     nodes[1] = {0,0,CSG::NONE};
@@ -128,7 +111,7 @@ __device__ void Scene::CSG(TargetList* list, int capacity) {
     
 }
 
-__device__ void Scene::CSG2(TargetList* list, int capacity) {
+__device__ void Scene::CSG2(TargetList* list) {
     list->targets[list->size++] = new Sphere(Vector3D(3,29,30), 15, Vector3D(1,1,1), 20);
 /*
     {
@@ -199,6 +182,6 @@ __device__ void Scene::CSG2(TargetList* list, int capacity) {
     
 }
 
-__device__ void Scene::light(TargetList* list, int capacity) {
+__device__ void Scene::light(TargetList* list) {
     list->targets[list->size++] = new Sphere(Vector3D(3,29,30), 15, Vector3D(1,1,1), 20);
 }

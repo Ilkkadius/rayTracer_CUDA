@@ -1,0 +1,94 @@
+CONFIG {
+
+    eye         0.756962 -0.0769513 1.94205
+    direction   0.898232 0.067276 -0.434341
+    up          0.433603 0.0259834 0.900729
+    background  dark
+
+}
+
+
+
+SCENE {
+
+    PRIMITIVE {
+        TRIANGLE { -1000 0 -2 1000 1000 -2 1000 -1000 -2 0.28 0.3 0.1 0 }
+        SPHERE { -3 25 25 16 1 1 1 20 }
+    }
+
+    CSG {
+
+        difference transform { rotate 0 0 1 55 0 0 0 rotate 0 1 0 -15 0 0 0 move 5 0.25 0 } {
+            difference {
+                difference {
+                    difference {
+                        intersection {
+                            BOX { 2 2 2 0.9 0.9 0.9 0 }
+                            SPHERE { 0 0 0 1.41421356 0.9 0.9 0.9 0 }
+                        }
+                        union { # Two
+                            SPHERE { -1 0 -0.4 0.1 0.2 0.2 0.2 0 }
+                            SPHERE { -1 0 0.4 0.1 0.2 0.2 0.2 0 }
+                        }
+                    }
+                    union {
+                        union TRANSFORM { rotate 0 0 1 -90 0 0 0 } { # Four
+                            union {
+                                SPHERE { -1 -0.4 -0.4 0.1 0.2 0.2 0.2 0 }
+                                SPHERE { -1 -0.4 0.4 0.1 0.2 0.2 0.2 0 }
+                            }
+                            union {
+                                SPHERE { -1 0.4 -0.4 0.1 0.2 0.2 0.2 0 }
+                                SPHERE { -1 0.4 0.4 0.1 0.2 0.2 0.2 0 }
+                            }
+                        }
+
+                        union TRANSFORM { rotate 0 0 1 90 0 0 0 } { # Three
+                            SPHERE { -1 -0 0 0.1 0.2 0.2 0.2 0 }
+                            union {
+                                SPHERE { -1 0 -0.4 0.1 0.2 0.2 0.2 0 }
+                                SPHERE { -1 0 0.4 0.1 0.2 0.2 0.2 0 }
+                            }
+                        }
+                    }
+                }
+                union TRANSFORM { rotate 0 1 0 90 0 0 0 } { # Six
+                    union {
+                        SPHERE { -1 -0.4 -0.4 0.1 0.2 0.2 0.2 0 }
+                        union {
+                            SPHERE { -1 -0.4 0 0.1 0.2 0.2 0.2 0 }
+                            SPHERE { -1 -0.4 0.4 0.1 0.2 0.2 0.2 0 }
+                        }
+                    }
+                    union {
+                        SPHERE { -1 0.4 -0.4 0.1 0.2 0.2 0.2 0 }
+                        union {
+                            SPHERE { -1 0.4 0 0.1 0.2 0.2 0.2 0 }
+                            SPHERE { -1 0.4 0.4 0.1 0.2 0.2 0.2 0 }
+                        }
+                    }
+                }
+            }
+            union TRANSFORM { rotate 0 0 1 180 0 0 0 } { # One and five
+                union {
+                    SPHERE { 0 0 -1 0.1 0.2 0.2 0.2 0 } # One, the rest handle the five
+                    union {
+                        SPHERE { -1 -0.4 -0.4 0.1 0.2 0.2 0.2 0 }
+                        SPHERE { -1 -0.4 0.4 0.1 0.2 0.2 0.2 0 }
+                    }
+                }
+                union {
+                    SPHERE { -1 0 0 0.1 0.2 0.2 0.2 0 }
+                    union {
+                        SPHERE { -1 0.4 -0.4 0.1 0.2 0.2 0.2 0 }
+                        SPHERE { -1 0.4 0.4 0.1 0.2 0.2 0.2 0 }
+                    }
+                }
+            }
+        }
+
+        
+
+    }
+}
+

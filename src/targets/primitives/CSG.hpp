@@ -4,7 +4,7 @@
 #include "target.hpp"
 
 // CSG_MAX_STACK should be at least as large as maxCollisions() of a CSG object, typically 2*targetCount!
-#define CSG_MAX_STACK 25
+#define CSG_MAX_STACK 50
 
 enum class CSG {
     UNION,

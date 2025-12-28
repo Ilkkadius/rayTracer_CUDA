@@ -21,8 +21,7 @@
 #include "kernelSet.hpp"
 #include "realtimeRenderf.hpp"
 #include "renderMode.hpp"
-#include "csgRead.hpp"
-
+#include "fileRead.hpp"
 
 // ################################################################
 
@@ -43,8 +42,8 @@ int main(int argc, char *argv[]) {
     // # SET PROGRAM RUN PARAMETERS
     // #################################
 
-
-    Camera cam;
+    Config conf;
+    Camera& cam = conf.cam;
 
     cam.width = 1920; cam.height = 1080;
     cam.depth = 4; cam.samples = 10;
@@ -106,44 +105,39 @@ int main(int argc, char *argv[]) {
     }
     std::cout << std::boolalpha << backup << termcolor::reset << std::endl;
 
-    cam.eye = eye;
-    cam.direction = direction;
-    cam.up = up;
 
-    cam.check();
+    cudaDeviceSetLimit(cudaLimitStackSize, 8 * 1024);
+
+    TargetList** list; Target** targets; int N = int(MAXIMUM_TARGET_COUNT);
+    CHECK(cudaMalloc(&list, sizeof(TargetList*)));
+    CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
+    initializeTargets<<<1,1>>>(targets, list, N, conf.scene);
+    CHECK(cudaDeviceSynchronize());
+    
+    fileRead::parseFile("example.txt", list, conf);
+    conf.cam.check();
+
+    WindowVectors *cudaWindow = NULL;
+    CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
+    CHECK(cudaMemcpy(cudaWindow, &conf.cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
+    std::cout << "Window ready" << std::endl;
+
+    BackgroundColor** background_d;
+    CHECK(cudaMalloc(&background_d, sizeof(BackgroundColor*)));
+    initializeBG<<<1,1>>>(background_d, conf.background);
+    CHECK(cudaDeviceSynchronize());
+    std::cout << "Background ready" << std::endl;
+
 
     int width = cam.width, height = cam.height;
-
-    cudaDeviceSetLimit(cudaLimitStackSize, 4096);
-
     std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
                             + (cam.samples > 0 ? "_N" + std::to_string(cam.samples) : "") + "_GPU_backup.bin");
     std::string backupTextPath = "" + aux::getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
                             + (cam.samples > 0 ? "_N" + std::to_string(cam.samples) : "") + "_GPU_backup.txt";
 
-    WindowVectors *cudaWindow = NULL;
-    CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
-    CHECK(cudaMemcpy(cudaWindow, &cam.window, sizeof(WindowVectors), cudaMemcpyHostToDevice));
-    std::cout << "Window ready" << std::endl;
 
     Vector3D *results;
     CHECK(cudaMallocManaged(&results, width*height*sizeof(Vector3D)));
-
-    backgroundType bgType = backgroundType::NIGHT;
-    BackgroundColor** background_d;
-    CHECK(cudaMalloc(&background_d, sizeof(BackgroundColor*)));
-    initializeBG<<<1,1>>>(background_d, bgType);
-    CHECK(cudaDeviceSynchronize());
-    std::cout << "Background ready" << std::endl;
-
-    TargetList** list; Target** targets; int N = int(MAXIMUM_TARGET_COUNT);
-    CHECK(cudaMalloc(&list, sizeof(TargetList*)));
-    CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
-    initializeTargets<<<1,1>>>(targets, list, N);
-    CHECK(cudaDeviceSynchronize());
-
-
-    if(readCSG) csgRead::csgFromFile((parentDir + "csg.txt").c_str(), list);
 
     if(fileRead) {
         MeshRead::TargetsFromFile("teapot.obj", list);
@@ -157,7 +151,7 @@ int main(int argc, char *argv[]) {
     BVHTree** tree;
     CHECK(cudaMalloc(&tree, sizeof(BVHTree*)));
     CHECK(cudaDeviceSynchronize());
-    buildBVH<<<1,1>>>(list, tree);
+    buildBVH<<<1,1>>>(list, tree); 
     CHECK(cudaDeviceSynchronize());
     
     std::cout << "Targets generated" << std::endl;

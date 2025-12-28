@@ -1,21 +1,5 @@
 #include "csgRead.hpp"
 
-__host__ bool readVector3D(std::stringstream& ss, Vector3D& vec) { // TODO: Able to handle multiple lines
-    return (ss >> vec.x) && (ss >> vec.y) && ( ss >> vec.z);
-}
-
-__host__ bool csgRead::findNext(streamHolder sh, std::string& line, uint& linenum) {
-    if(sh.ss >> line) {
-        return true;
-    } else {
-        while(std::getline(sh.file, line)) {
-            linenum++; sh.ss.str(line); sh.ss.clear();
-            if(sh.ss >> line) return true;
-        }
-    }
-    return false;
-}
-
 // The following non-empty character must be '{'
 __host__ void csgRead::findStart(streamHolder sh, std::string& line, uint& linenum, affine& aff) {
     findNext(sh, line, linenum); aux::uppercase(line);
@@ -38,35 +22,11 @@ __host__ void csgRead::skipTransformation(streamHolder sh, std::string& line, ui
     if(line == "TRANSFORM") {
         while(findNext(sh, line, linenum) && line != "}") {}
         findNext(sh, line, linenum);
-        if(line != "{") aux::error(sh.path, linenum, "CSG skip transformation: Expected \"{\", found \"" + line + "\".");
-    } else if(line != "{") aux::error(sh.path, linenum, "CSG skip transformation: Expected \"{\", found \"" + line + "\".");
+        if(line != "{") aux::error(sh.path, linenum, "Skip transformation: Expected \"{\", found \"" + line + "\".");
+    } else if(line != "{") aux::error(sh.path, linenum, "Skip transformation: Expected \"{\", found \"" + line + "\".");
 }
 
-__host__ void csgRead::readTransformation(streamHolder sh, std::string& line, uint& linenum, affine& aff) {
-    findNext(sh, line, linenum);
-    if(line != "{") aux::error(sh.path, linenum, "CSG Transformation: Expected \"{\", found \"" + line + "\".");
-    bool ready = false;
-    while(findNext(sh, line, linenum)) {
-        aux::uppercase(line);
-        if(line == "MOVE") {
-            Vector3D b;
-            if(!readVector3D(sh.ss, b)) aux::error(sh.path, linenum, "CSG Transformation: Could not read translation vector.");
-            aff.b += b;
-        } else if(line == "ROTATE") {
-            Vector3D axis, pos; float angle;
-            if(!readVector3D(sh.ss, axis)) aux::error(sh.path, linenum, "CSG Transformation: Could not read axis.");
-            if(!(sh.ss >> angle)) aux::error(sh.path, linenum, "CSG Transformation: Could not read angle.");
-            if(!readVector3D(sh.ss, pos)) aux::error(sh.path, linenum, "CSG Transformation: Could not read axis position.");
-            Matrix rot = generateRotation(angle * M_PI/180.0f, unitVec(axis));
-            aff.A = rot * aff.A; aff.b = rot * aff.b;
-        } else if(line == "}") {
-            ready = true;
-            break;
-        }
-    }
 
-    if(!ready) aux::error(sh.path, linenum, "CSG Transformation: Definition does not end, forgotten \"}\"?");
-}
 
 __host__ bool csgRead::readTargets(const char* path, std::vector<targetData>& data, uint linenum) {
     int counter = 1;
@@ -88,7 +48,7 @@ __host__ bool csgRead::readTargets(const char* path, std::vector<targetData>& da
                 if(!(ss >> r)) aux::error(path, linenum, "Could not parse Sphere radius.");
                 if(!readVector3D(ss, color)) aux::error(path, linenum, "Could not parse Sphere color.");
                 if(!(ss >> e)) aux::error(path, linenum, "Could not parse Sphere emission.");
-                data.push_back({CSGTarget::SPHERE, center.x, center.y, center.z, r, color.x, color.y, color.z, e});
+                data.push_back({targetType::SPHERE, center.x, center.y, center.z, r, color.x, color.y, color.z, e});
                 findEnd(sh, line, linenum);
             } else if(line == "BOX") {
                 Vector3D color;
@@ -99,7 +59,7 @@ __host__ bool csgRead::readTargets(const char* path, std::vector<targetData>& da
                 if(!(ss >> c)) aux::error(path, linenum, "Could not parse Box z-width.");
                 if(!readVector3D(ss, color)) aux::error(path, linenum, "Could not parse Box color.");
                 if(!(ss >> e)) aux::error(path, linenum, "Could not parse Box emission.");
-                data.push_back({CSGTarget::BOX, a, b, c, color.x, color.y, color.z, e});
+                data.push_back({targetType::BOX, a, b, c, color.x, color.y, color.z, e});
                 findEnd(sh, line, linenum);
             } else if(line == "{") {
                 counter++;
@@ -221,11 +181,11 @@ __global__ void csgRead::generateCSG(TargetList** list, uint* firstList, CSG* op
         if(!targets) printf("generateCSG: target allocation failed.\n");
         
         for(int i = 0; i < targetCount; i++) {
-            CSGTarget type = data[i].type;
+            targetType type = data[i].type;
             affine aff = affines[i];
             float* p = data[i].params;
             switch(type) {
-                case CSGTarget::SPHERE:
+                case targetType::SPHERE:
                 {
                     Sphere* obj = new Sphere(Vector3D(p[0],p[1],p[2]),p[3],Vector3D(p[4],p[5],p[6]),p[7]);
                     if(!obj) printf("generateCSG: Sphere allocation failed, i=%d.\n", i);
@@ -233,7 +193,7 @@ __global__ void csgRead::generateCSG(TargetList** list, uint* firstList, CSG* op
                     targets[i] = obj;
                     break;
                 }
-                case CSGTarget::BOX:
+                case targetType::BOX:
                 {
                     Box* obj = new Box(p[0],p[1],p[2],Vector3D(p[3],p[4],p[5]),p[6]);
                     if(!obj) printf("generateCSG: Box allocation failed, i=%d.\n", i);
@@ -249,33 +209,27 @@ __global__ void csgRead::generateCSG(TargetList** list, uint* firstList, CSG* op
     }
 }
 
-__host__ void csgRead::csgFromFile(const char* path, TargetList** list) {
-    std::ifstream file(path);
-    std::string line;
-    std::stringstream ss;
-    uint linenum = 0;
-
-    std::vector<uint> firstList;
-    std::vector<CSG> operList;
-    std::vector<targetData> targets;
-    std::vector<affine> affines;
-
-    streamHolder sh{path, file, ss};
-    affine aff{unitMatrix(), Vector3D(0.0f,0.0f,0.0f)};
-
-    while(std::getline(file, line)) {
+__host__ void csgRead::parseCSG(streamHolder sh, std::string& line, uint& linenum,  TargetList** list) {
+    if(!findNext(sh, line, linenum) || line != "{") aux::error(sh.path, linenum, "CSG: Expected \"{\", found " + line + ".");
+    while(std::getline(sh.file, line)) {
         linenum++;
-        ss.str(line); ss.clear(); // Removes previous error flags
-        while(ss >> line) {
+        sh.ss.str(line); sh.ss.clear(); // Removes previous error flags
+        while(sh.ss >> line) {
             aux::uppercase(line);
             if(line[0] == '#') {
                 break;
+            } else if(line == "}") {
+                return;
             } else if(line == "UNION" || line == "INTERSECTION" || line == "DIFFERENCE") {
-                if(!readTargets(path, targets, linenum)) aux::error(path, linenum, "Could not parse CSG object. Missing curly braces: \"{\", \"}\" ?");
-                if(targets.size() < 1) {
-                    file.close();
-                    return;
-                }
+
+                std::vector<uint> firstList;
+                std::vector<CSG> operList;
+                std::vector<targetData> targets;
+                std::vector<affine> affines;
+                affine aff{unitMatrix(), Vector3D(0.0f,0.0f,0.0f)};
+
+                if(!readTargets(sh.path, targets, linenum)) aux::error(sh.path, linenum, "Could not parse CSG object. Missing curly braces: \"{\", \"}\" ?");
+                if(targets.size() < 1) aux::error(sh.path, linenum, "CSG: No targets found.");
                 firstList.resize(2*targets.size()); operList.resize(2*targets.size());
                 affines.resize(targets.size());
 
@@ -293,8 +247,6 @@ __host__ void csgRead::csgFromFile(const char* path, TargetList** list) {
                 processRight(sh, 2, line, firstList, operList, affines, nodeCounter, targetCounter, linenum, aff);
 
                 findEnd(sh, line, linenum);
-
-                file.close();
 
                 firstList.resize(nodeCounter); operList.resize(nodeCounter);
 
@@ -319,7 +271,5 @@ __host__ void csgRead::csgFromFile(const char* path, TargetList** list) {
             }
         }
     }
-
-    
-
+    aux::error(sh.path, linenum, "CSG: Definition end not found, forgotten \"}\"?");
 }

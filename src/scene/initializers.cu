@@ -15,26 +15,25 @@
 
 
 
-__device__ void init::createTargets(TargetList** list, int capacity) {
-    int N = capacity;
-    switch(5) {
-        case 1:
-            Scene::Platon(*list, N);
+__device__ void init::createTargets(TargetList** list, sceneType type) {
+    switch(type) {
+        case sceneType::PLATON:
+            Scene::Platon(*list);
             break;
-        case 2:
-            Scene::testScene(*list, N);
+        case sceneType::TEST:
+            Scene::testScene(*list);
             break;
-        case 3:
-            Scene::CSG(*list, N);
+        case sceneType::CSG:
+            Scene::CSG(*list);
             break;
-        case 4:
-            Scene::CSG2(*list, N);
+        case sceneType::CSG2:
+            Scene::CSG2(*list);
             break;
-        case 5:
-            Scene::light(*list, N);
+        case sceneType::LIGHT:
+            Scene::light(*list);
             break;
         default:
-            Scene::empty(*list, N);
+            Scene::empty(*list);
             break;
     }
 }

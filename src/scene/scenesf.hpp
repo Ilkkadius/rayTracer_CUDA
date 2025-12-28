@@ -16,17 +16,19 @@ enum class sceneType {
 
 namespace Scene{
 
-    __device__ void testScene(TargetList* list, int capacity);
+    __host__ bool parseScene(std::string line, sceneType& type);
 
-    __device__ void empty(TargetList* list, int capacity);
+    __device__ void testScene(TargetList* list);
 
-    __device__ void Platon(TargetList* list, int capacity);
+    __device__ void empty(TargetList* list);
 
-    __device__ void CSG(TargetList* list, int capacity);
+    __device__ void Platon(TargetList* list);
 
-    __device__ void CSG2(TargetList* list, int capacity);
+    __device__ void CSG(TargetList* list);
 
-    __device__ void light(TargetList* list, int capacity);
+    __device__ void CSG2(TargetList* list);
+
+    __device__ void light(TargetList* list);
 };
 
 #endif
