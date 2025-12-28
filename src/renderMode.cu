@@ -1,5 +1,21 @@
 #include "renderMode.hpp"
 
+bool Mode::parseRenderMode(std::string line, RenderMode& mode) {
+    aux::uppercase(line);
+    if(line == "SINGLE") {
+        mode = RenderMode::Single_full;
+        return true;
+    } else if(line == "PARTIAL") {
+        mode = RenderMode::Partial_full;
+        return true;
+    } else if(line == "PIXEL") {
+        mode = RenderMode::Partial_pixel;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void Mode::FullRender(int width, int height, int tx, int ty, timepoint& start, curandState** randState_ptr, Vector3D* results, 
                 int depth, int samples, BVHTree** tree, BackgroundColor** background_d, WindowVectors* cudaWindow) {
     dim3 blocks(divup(width, tx), divup(height, ty));

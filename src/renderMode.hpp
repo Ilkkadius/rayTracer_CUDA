@@ -17,6 +17,9 @@ enum class RenderMode {
 };
 
 namespace Mode {
+
+bool parseRenderMode(std::string line, RenderMode& mode);
+
 void FullRender(int width, int height, int tx, int ty, timepoint& start, curandState** randState_ptr, Vector3D* results, 
                 int depth, int samples, BVHTree** tree, BackgroundColor** background_d, WindowVectors* cudaWindow);
 void partialFullRender(int width, int height, int tx, int ty, timepoint& start, curandState** randState_ptr, Vector3D* results, 
