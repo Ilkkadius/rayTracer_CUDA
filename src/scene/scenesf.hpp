@@ -5,6 +5,15 @@
 
 #include "compoundf.hpp"
 
+enum class sceneType {
+    EMPTY,
+    PLATON,
+    LIGHT,
+    CSG,
+    TEST,
+    CSG2
+};
+
 namespace Scene{
 
     __device__ void testScene(TargetList* list, int capacity);
