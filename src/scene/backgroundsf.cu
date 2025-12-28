@@ -1,5 +1,21 @@
 #include "backgroundsf.hpp"
 
+bool BackgroundColor::parseBackground(std::string line, backgroundType& type) {
+    aux::uppercase(line);
+    if(line == "DARK" || line == "DARKNESS") {
+        type = backgroundType::DARKNESS;
+        return true;
+    } else if(line == "DAY") {
+        type = backgroundType::DAY;
+        return true;
+    } else if(line == "NIGHT") {
+        type = backgroundType::NIGHT;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 __device__ darkness::darkness() {}
 
 __device__ Vector3D darkness::colorize(const Ray& ray) const {

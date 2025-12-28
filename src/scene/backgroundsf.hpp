@@ -22,6 +22,8 @@ public:
     __device__ virtual Vector3D colorize(const Ray& ray) const {
         return Vector3D(0.0f,0.0f,0.0f);
     }
+
+    __host__ static bool parseBackground(std::string line, backgroundType& type);
 };
 
 class darkness : public BackgroundColor{
