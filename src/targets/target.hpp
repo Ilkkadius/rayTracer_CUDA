@@ -8,6 +8,12 @@
 
 class HitInfo;
 
+enum class targetType {
+    SPHERE, // 8 floats
+    BOX, // 7 floats
+    TRIANGLE // 13 floats
+};
+
 class Target{
 public:
 

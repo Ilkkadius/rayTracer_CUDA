@@ -213,10 +213,10 @@ __global__ void initializeBG(BackgroundColor** background, backgroundType type) 
     }
 }
 
-__global__ void initializeTargets(Target** targets, TargetList** list, int capacity) {
+__global__ void initializeTargets(Target** targets, TargetList** list, int capacity, sceneType type) {
     if(threadIdx.x == 0 && blockIdx.x == 0) {
         *list = new TargetList(targets, capacity);
-        init::createTargets(list, capacity);
+        init::createTargets(list, type);
     }
 }
 
