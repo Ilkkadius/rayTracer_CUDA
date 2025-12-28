@@ -3,6 +3,25 @@
 #include "CSG.hpp"
 
 __device__ void Scene::testScene(TargetList* list, int capacity) {
+__host__ bool Scene::parseScene(std::string line, sceneType& type) {
+    aux::uppercase(line);
+    if(line == "EMPTY" || line == "VOID") {
+        type = sceneType::EMPTY;
+    } else if(line == "LIGHT") {
+        type = sceneType::LIGHT;
+    } else if(line == "CSG") {
+        type = sceneType::CSG;
+    } else if(line == "CSG2") {
+        type = sceneType::CSG2;
+    } else if(line == "TEST") {
+        type = sceneType::TEST;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+
     //float r = 500;
     Vector3D red(0.9,0.1,0.1), green(0.1,0.9,0.1), blue(0.1,0.1,0.9), white(1,1,1), black(0,0,0);
 
