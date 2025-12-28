@@ -28,7 +28,7 @@ __device__ float Node::getsHit(const Ray& ray) const {
 __device__ BVHTree::BVHTree(TargetList** listptr) : nodeCount(0), targetCount(0) {
     targetCount = (*listptr)->size;
     if(targetCount < 1) {
-        targets = NULL; return;
+        targets = NULL; printf("NO TARGETS FOUND! Returning empty BVH.\n"); return;
     }
     targets = (*listptr)->targets;
     tIdx = new uint[targetCount];
