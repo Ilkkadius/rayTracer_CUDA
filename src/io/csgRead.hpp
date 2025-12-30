@@ -7,10 +7,6 @@
 #include <sstream>
 #include <fstream>
 
-#include "vector3D.hpp"
-#include "target.hpp"
-#include "kernelSet.hpp"
-
 #include "fileRead.hpp"
 
 using namespace readMethods;
