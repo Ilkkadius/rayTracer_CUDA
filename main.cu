@@ -6,7 +6,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-#include "termcolor.hpp"
+
 
 #include "initializers.hpp"
 #include "tracerf.hpp"
@@ -18,10 +18,12 @@
 #include "image.hpp"
 #include "BVHf.hpp"
 #include "meshRead.hpp"
-#include "kernelSet.hpp"
 #include "realtimeRenderf.hpp"
 #include "renderMode.hpp"
 #include "fileRead.hpp"
+#include "cui.hpp"
+
+
 
 // ################################################################
 
@@ -38,6 +40,16 @@
 
 int main(int argc, char *argv[]) {
 
+    std::string parentDir = aux::parentDirectory(__FILE__);
+
+    bool backup = false;
+
+    cui::inputs cmd;
+
+    if(!cui::parseCommandLineInput(argc, argv, cmd)) return 0;
+    
+    cui::checkScene(cmd);
+
     // #################################
     // # SET PROGRAM RUN PARAMETERS
     // #################################
@@ -48,46 +60,31 @@ int main(int argc, char *argv[]) {
     cam.width = 1920; cam.height = 1080;
     cam.depth = 4; cam.samples = 10;
     int tx = 8, ty = 8;
-    bool backup = false;
-    bool realTime = false;
-    bool fileRead = false;
-    bool readCSG = true;
-
+    
     cam.setFOV(80.0f);
 
-    Vector3D eye(0, 0, 0);
-    Vector3D direction(1, 0, 0);
-    Vector3D up = direction + Vector3D(0, 0, 100);
-
-    RenderMode launchMode = RenderMode::Single_full;
-
-    if(argc >= 2) {
-        std::string mode = argv[1];
-        aux::uppercase(mode);
-        if(mode == "SINGLE" || mode == "FULL") {
-            launchMode = RenderMode::Single_full;
-        } else if(mode == "PARTFULL" || mode == "PARTIALFULL" || mode == "PARTIALLYFULL") {
-            launchMode = RenderMode::Partial_full;
-        } else if(mode == "PARTIALPIXEL" || mode == "PIXEL" || mode == "PIXELS") {
-            launchMode = RenderMode::Partial_pixel;
-        }
-    }
-
-    if(argc >= 3) {
-        aux::stringToInt((std::string)argv[2], cam.samples);
-        if(cam.samples < 1) {
-            std::cout << termcolor::bold << termcolor::red << "Samplecount must be at least 1" << termcolor::reset << std::endl;
-            exit(1);
-        }
-
-    }
-
-    std::string parentDir = aux::parentDirectory(__FILE__);
-    std::cout << parentDir << std::endl;
-
+    cudaDeviceSetLimit(cudaLimitStackSize, MAXIMUM_TOTAL_STACK_SIZE);
+   
     // #################################
     // # LOAD DATA TO DEVICE
     // #################################
+
+    cui::overrideConfig(cmd, conf);
+
+    TargetList** list; Target** targets; int N = int(MAXIMUM_TARGET_COUNT);
+    CHECK(cudaMalloc(&list, sizeof(TargetList*)));
+    CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
+    initializeTargets<<<1,1>>>(targets, list, N, conf.scene);
+    CHECK(cudaDeviceSynchronize());
+    
+    if(!cmd.file.empty())
+        fileRead::parseFile(cmd.file.c_str(), list, conf);
+    conf.cam.check();
+
+    if(cmd.realtime) conf.realtime = true;
+    if(cmd.samples > 0) conf.cam.samples = cmd.samples;
+
+    int width = cam.width, height = cam.height;
 
     std::cout << termcolor::yellow <<
     "#################################\n"
@@ -96,7 +93,7 @@ int main(int argc, char *argv[]) {
     "#################################" 
     << termcolor::reset << std::endl;
 
-    std::cout << "Resolution: " << cam.width << "x" << cam.height << ", N = " << cam.samples << ", recursion = " << cam.depth << std::endl;
+    std::cout << "Resolution: " << width << "x" << height << ", N = " << cam.samples << ", bounces = " << cam.depth << std::endl;
     std::cout << "Backup to file: ";
     if(backup) {
         std::cout << termcolor::bright_green;
@@ -104,18 +101,6 @@ int main(int argc, char *argv[]) {
         std::cout << termcolor::bright_red;
     }
     std::cout << std::boolalpha << backup << termcolor::reset << std::endl;
-
-
-    cudaDeviceSetLimit(cudaLimitStackSize, 8 * 1024);
-
-    TargetList** list; Target** targets; int N = int(MAXIMUM_TARGET_COUNT);
-    CHECK(cudaMalloc(&list, sizeof(TargetList*)));
-    CHECK(cudaMalloc(&targets, N*sizeof(Target*)));
-    initializeTargets<<<1,1>>>(targets, list, N, conf.scene);
-    CHECK(cudaDeviceSynchronize());
-    
-    fileRead::parseFile("example.txt", list, conf);
-    conf.cam.check();
 
     WindowVectors *cudaWindow = NULL;
     CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
@@ -129,7 +114,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Background ready" << std::endl;
 
 
-    int width = cam.width, height = cam.height;
+    
     std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
                             + (cam.samples > 0 ? "_N" + std::to_string(cam.samples) : "") + "_GPU_backup.bin");
     std::string backupTextPath = "" + aux::getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
@@ -139,10 +124,13 @@ int main(int argc, char *argv[]) {
     Vector3D *results;
     CHECK(cudaMallocManaged(&results, width*height*sizeof(Vector3D)));
 
-    if(fileRead) {
+    /*
+    bool meshRead = false;
+    if(meshRead) {
         MeshRead::TargetsFromFile("teapot.obj", list);
         CHECK(cudaDeviceSynchronize());
     }
+    */
 
     Compound** compounds;
     CHECK(cudaMalloc(&compounds, sizeof(Compound*)));
@@ -156,7 +144,7 @@ int main(int argc, char *argv[]) {
     
     std::cout << "Targets generated" << std::endl;
 
-    if(realTime) {
+    if(conf.realtime) {
         realtimeRender::startCamera(cam, tree, background_d);
         return 0;
     }
@@ -164,7 +152,7 @@ int main(int argc, char *argv[]) {
     timepoint start;
     curandState *randState_d;
 
-    switch(launchMode) {
+    switch(cmd.launchMode) {
         case RenderMode::Single_full: // Full image rendered by one kernel
             Mode::FullRender(width, height, tx, ty, start, &randState_d, results, cam.depth, cam.samples, tree, background_d, cudaWindow);
             break;

@@ -10,8 +10,8 @@ enum class sceneType {
     PLATON,
     LIGHT,
     CSG,
+    CSG2,
     TEST,
-    CSG2
 };
 
 __host__ inline std::ostream& operator<<(std::ostream& os, sceneType type) {
