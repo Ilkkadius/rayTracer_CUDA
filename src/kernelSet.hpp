@@ -12,6 +12,8 @@
 #include "vector3D.hpp"
 #include "BVHf.hpp"
 
+#ifdef __CUDACC__
+
 template <class Tptr>
 __global__ void completeRender(sf::Uint8 *pixels,
         int width, int height, 
@@ -36,6 +38,8 @@ __global__ void completeRender(sf::Uint8 *pixels,
     pixels[idx + 2] = color.z;
     pixels[idx + 3] = 255;
 }
+
+#endif
 
 /**
  * @brief Calculates pixel values and adds them to pixels
