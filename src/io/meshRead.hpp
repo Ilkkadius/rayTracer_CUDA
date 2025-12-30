@@ -7,10 +7,8 @@
 #include <sstream>
 #include <fstream>
 
-#include "vector3D.hpp"
-#include "target.hpp"
 #include "compoundf.hpp"
-#include "kernelSet.hpp"
+#include "readMethods.hpp"
 
 // NB: .obj file indexing starts from 1
 
