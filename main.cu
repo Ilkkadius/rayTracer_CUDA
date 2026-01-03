@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     cam.depth = 4; cam.samples = 10;
     int tx = 8, ty = 8;
     
-    cam.setFOV(80.0f);
+    cam.fov = 110.0f;
 
     cudaDeviceSetLimit(cudaLimitStackSize, MAXIMUM_TOTAL_STACK_SIZE);
    
