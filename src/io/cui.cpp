@@ -51,7 +51,7 @@ void cui::checkScene(inputs& cmd) {
             "Select another scene by providing a number, write a config file path, or press enter to continue" << std::endl;
         std::string line;
         while(true) {
-            int sceneCount = 5;
+            int sceneCount = 4;
             std::cout << termcolor::yellow << "\nScenes:" << termcolor::reset << std::endl;
             for(int i = 0; i < sceneCount; i++) {
                 sceneType s = sceneType(i);
@@ -86,7 +86,14 @@ void cui::checkScene(inputs& cmd) {
 void cui::overrideConfig(inputs& cmd, Config& conf) {
     if(cmd.scene != sceneType::EMPTY) {
         conf.scene = cmd.scene;
-        if(cmd.scene == sceneType::PLATON) conf.background = backgroundType::NIGHT;
+        switch(cmd.scene) {
+            case sceneType::CSG:
+            case sceneType::PLATON:
+                conf.background = backgroundType::NIGHT;
+                break;
+            default:
+                return;
+        } 
     }
 }
 

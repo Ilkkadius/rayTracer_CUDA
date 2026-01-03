@@ -26,9 +26,6 @@ __device__ void init::createTargets(TargetList** list, sceneType type) {
         case sceneType::CSG:
             Scene::CSG(*list);
             break;
-        case sceneType::CSG2:
-            Scene::CSG2(*list);
-            break;
         case sceneType::LIGHT:
             Scene::light(*list);
             break;

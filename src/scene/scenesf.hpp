@@ -8,9 +8,8 @@
 enum class sceneType {
     EMPTY,
     PLATON,
-    LIGHT,
     CSG,
-    CSG2,
+    LIGHT,
     TEST,
 };
 
@@ -22,14 +21,11 @@ __host__ inline std::ostream& operator<<(std::ostream& os, sceneType type) {
         case sceneType::PLATON:
             os << "PLATON";
             break;
-        case sceneType::LIGHT:
-            os << "LIGHT";
-            break;
         case sceneType::CSG:
             os << "CSG";
             break;
-        case sceneType::CSG2:
-            os << "CSG2";
+        case sceneType::LIGHT:
+            os << "LIGHT";
             break;
         case sceneType::TEST:
             os << "TEST";
@@ -49,8 +45,6 @@ namespace Scene{
     __device__ void Platon(TargetList* list);
 
     __device__ void CSG(TargetList* list);
-
-    __device__ void CSG2(TargetList* list);
 
     __device__ void light(TargetList* list);
 };
