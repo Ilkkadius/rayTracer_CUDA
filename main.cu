@@ -42,8 +42,6 @@ int main(int argc, char *argv[]) {
 
     std::string parentDir = aux::parentDirectory(__FILE__);
 
-    bool backup = false;
-
     cui::inputs cmd;
 
     if(!cui::parseCommandLineInput(argc, argv, cmd)) return 0;
@@ -86,21 +84,7 @@ int main(int argc, char *argv[]) {
 
     int width = cam.width, height = cam.height;
 
-    std::cout << termcolor::yellow <<
-    "#################################\n"
-    "#        Ray tracer (GPU)       #\n"
-    "# Date: " << aux::getDate() << " #\n"
-    "#################################" 
-    << termcolor::reset << std::endl;
-
-    std::cout << "Resolution: " << width << "x" << height << ", N = " << cam.samples << ", bounces = " << cam.depth << std::endl;
-    std::cout << "Backup to file: ";
-    if(backup) {
-        std::cout << termcolor::bright_green;
-    } else {
-        std::cout << termcolor::bright_red;
-    }
-    std::cout << std::boolalpha << backup << termcolor::reset << std::endl;
+    cui::printStart(conf);
 
     WindowVectors *cudaWindow = NULL;
     CHECK(cudaMalloc(&cudaWindow, sizeof(WindowVectors)));
@@ -113,8 +97,6 @@ int main(int argc, char *argv[]) {
     CHECK(cudaDeviceSynchronize());
     std::cout << "Background ready" << std::endl;
 
-
-    
     std::string backupBinPath(aux::getRawDate() + "_" + Image::getImageDimensions(width, height) 
                             + (cam.samples > 0 ? "_N" + std::to_string(cam.samples) : "") + "_GPU_backup.bin");
     std::string backupTextPath = "" + aux::getRawDate() + "_" + std::to_string(width) + "x" + std::to_string(height) 
@@ -141,8 +123,6 @@ int main(int argc, char *argv[]) {
     CHECK(cudaDeviceSynchronize());
     buildBVH<<<1,1>>>(list, tree); 
     CHECK(cudaDeviceSynchronize());
-    
-    std::cout << "Targets generated" << std::endl;
 
     if(conf.realtime) {
         realtimeRender::startCamera(cam, tree, background_d);
@@ -186,7 +166,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if(backup) {
+    if(conf.backup) {
         Image::ToBinary(pixels, cam.width, cam.height);
     }
 

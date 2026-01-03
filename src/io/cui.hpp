@@ -45,6 +45,8 @@ namespace cui {
      */
     void overrideConfig(inputs& cmd, Config& conf);
 
+    void printStart(const Config& conf);
+
 };
 
 #endif
