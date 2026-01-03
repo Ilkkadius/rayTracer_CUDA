@@ -10,16 +10,16 @@
 class Camera {
 public:
 
-    int width;
-    int height;
-    int samples;
-    int depth;
-
     Vector3D eye;
     Vector3D direction;
     Vector3D up;
 
-    float windowHeight;
+    float fov;
+
+    int width;
+    int height;
+    int samples;
+    int depth;
 
 
     /**
@@ -46,13 +46,6 @@ public:
     __host__ Camera(int widthPixels, int heightPixels, float FOV);
 
     /**
-     * @brief Set the field of view of the camera
-     * 
-     * @param FOV angle in degrees
-     */
-    __host__ void setFOV(float FOV);
-
-    /**
      * @brief Check that all parameters of the camera are good for rendering
      * 
      */
@@ -62,6 +55,8 @@ public:
     WindowVectors window;
 
     __host__ void initializeWindow();
+
+
 };
 
 #endif
