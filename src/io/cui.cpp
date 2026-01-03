@@ -89,3 +89,21 @@ void cui::overrideConfig(inputs& cmd, Config& conf) {
         if(cmd.scene == sceneType::PLATON) conf.background = backgroundType::NIGHT;
     }
 }
+
+void cui::printStart(const Config& conf) {
+    std::cout << termcolor::yellow <<
+    "#################################\n"
+    "#        Ray tracer (GPU)       #\n"
+    "# Date: " << aux::getDate() << " #\n"
+    "#################################" 
+    << termcolor::reset << std::endl;
+
+    std::cout << "Resolution: " << conf.cam.width << "x" << conf.cam.height << ", N = " << conf.cam.samples << ", bounces = " << conf.cam.depth << std::endl;
+    std::cout << "Backup to file: ";
+    if(conf.backup) {
+        std::cout << termcolor::bright_green;
+    } else {
+        std::cout << termcolor::bright_red;
+    }
+    std::cout << std::boolalpha << conf.backup << termcolor::reset << std::endl;
+}

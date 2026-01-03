@@ -59,6 +59,12 @@ __host__ void fileRead::parseConfig(streamHolder sh, std::string& line, uint& li
         } else if(line == "SCENE") {
             if(!findNext(sh, line, linenum) || !Scene::parseScene(line, conf.scene))
                 aux::error(sh.path, linenum, "parseConfig: Could not parse \"" + line + "\" as scene.");
+        } else if(line == "BACKUP") {
+            if(!findNext(sh, line, linenum)) aux::error("parseConfig: Could not find TRUE/FALSE for backup parameter.");
+            aux::uppercase(line); if(line == "TRUE") conf.backup = true;
+        } else if(line == "FOV") {
+            if(!findNext(sh, line, linenum) || !parseFloat(line, conf.cam.fov))
+                aux::error(sh.path, linenum, "parseConfig: Could not parse \"" + line + "\" as FOV.");
         } else {
             aux::error(sh.path, linenum, "parseConfig: Could not parse keyword.");
         }
