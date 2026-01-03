@@ -4,6 +4,7 @@ CONFIG {
     direction   0.898232 0.067276 -0.434341
     up          0.433603 0.0259834 0.900729
     background  dark
+    fov         80.0
 
 }
 
